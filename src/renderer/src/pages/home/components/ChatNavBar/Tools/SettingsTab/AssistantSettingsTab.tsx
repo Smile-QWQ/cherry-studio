@@ -29,6 +29,7 @@ import {
   setConfirmRegenerateMessage,
   setEnableQuickPanelTriggers,
   setFontSize,
+  setImageProcessMethod,
   setMathEnableSingleDollar,
   setMathEngine,
   setMessageFont,
@@ -44,7 +45,7 @@ import {
   setShowTranslateConfirm,
   setThoughtAutoCollapse
 } from '@renderer/store/settings'
-import type { Assistant, CodeStyleVarious, MathEngine } from '@renderer/types'
+import type { Assistant, CodeStyleVarious, ImageProcessMethod, MathEngine } from '@renderer/types'
 import { isGroqSystemProvider, ThemeMode } from '@renderer/types'
 import { getSendMessageShortcutLabel } from '@renderer/utils/input'
 import {
@@ -108,7 +109,8 @@ const AssistantSettingsTab = (props: Props) => {
     showTranslateConfirm,
     showMessageOutline,
     confirmDeleteMessage,
-    confirmRegenerateMessage
+    confirmRegenerateMessage,
+    imageProcessMethod
   } = useSettings()
 
   const codeStyle = useMemo(() => {
@@ -474,6 +476,19 @@ const AssistantSettingsTab = (props: Props) => {
               size="small"
               checked={renderInputMessageAsMarkdown}
               onChange={(checked) => dispatch(setRenderInputMessageAsMarkdown(checked))}
+            />
+          </SettingRow>
+          <SettingDivider />
+          <SettingRow>
+            <SettingRowTitleSmall>{t('settings.messages.input.image_process.title')}</SettingRowTitleSmall>
+            <Selector
+              value={imageProcessMethod}
+              onChange={(value) => dispatch(setImageProcessMethod(value as ImageProcessMethod))}
+              options={[
+                { value: 'ocr', label: 'OCR' },
+                { value: 'vision_model', label: t('settings.models.vision.label') },
+                { value: 'off', label: t('common.off') }
+              ]}
             />
           </SettingRow>
           <SettingDivider />

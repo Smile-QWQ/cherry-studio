@@ -23,7 +23,13 @@ import {
   isMac
 } from '@renderer/config/constant'
 import { allMinApps } from '@renderer/config/minapps'
-import { isFunctionCallingModel, isNotSupportTextDeltaModel, qwenModel, SYSTEM_MODELS } from '@renderer/config/models'
+import {
+  DEFAULT_MODELS,
+  isFunctionCallingModel,
+  isNotSupportTextDeltaModel,
+  qwenModel,
+  SYSTEM_MODELS
+} from '@renderer/config/models'
 import { BUILTIN_OCR_PROVIDERS, BUILTIN_OCR_PROVIDERS_MAP, DEFAULT_OCR_PROVIDER } from '@renderer/config/ocr'
 import { TRANSLATE_PROMPT } from '@renderer/config/prompts'
 import { SYSTEM_PROVIDERS } from '@renderer/config/providers'
@@ -3410,6 +3416,17 @@ const migrateConfig = {
       return state
     } catch (error) {
       logger.error('migrate 206 error', error as Error)
+      return state
+    }
+  },
+  '207': (state: RootState) => {
+    try {
+      state.settings.imageProcessMethod ||= 'ocr'
+      state.llm.visionModel ||= DEFAULT_MODELS.vision
+      logger.info('migrate 207 success')
+      return state
+    } catch (error) {
+      logger.error('migrate 207 error', error as Error)
       return state
     }
   }

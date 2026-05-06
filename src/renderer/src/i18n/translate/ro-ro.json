@@ -2319,7 +2319,10 @@
       "fetchTopicName": "Nu s-a putut numi subiectul",
       "file": {
         "process_failed": "Fișierul {{name}} nu a putut fi procesat",
-        "text_extraction_failed": "Nu s-a reușit extragerea textului din {{name}}"
+        "text_extraction_failed": "Nu s-a reușit extragerea textului din {{name}}",
+        "vision": {
+          "model_fallback_to_ocr": "[to be translated]:No vision model is configured, automatically fell back to OCR"
+        }
       },
       "get_embedding_dimensions": "Nu s-au putut obține dimensiunile embedding",
       "invalid": {
@@ -5006,6 +5009,9 @@
         "confirm_delete_message": "Confirmă înainte de ștergerea mesajelor",
         "confirm_regenerate_message": "Confirmă înainte de regenerarea mesajelor",
         "enable_quick_triggers": "Activează declanșatoarele / și @",
+        "image_process": {
+          "title": "[to be translated]:Image processing"
+        },
         "paste_long_text_as_file": "Lipește text lung ca fișier",
         "paste_long_text_threshold": "Lungime lipire text lung",
         "send_shortcuts": "Comenzi rapide trimitere",
@@ -5188,7 +5194,11 @@
       "translate_model_prompt_message": "Te rugăm să introduci promptul modelului de traducere",
       "translate_model_prompt_title": "Prompt model traducere",
       "use_assistant": "Folosește asistent",
-      "use_model": "Model implicit"
+      "use_model": "Model implicit",
+      "vision": {
+        "description": "[to be translated]:When the current chat model does not support vision, use a vision model to extract image information and inject it into the message body before sending.",
+        "label": "[to be translated]:Vision model"
+      }
     },
     "moresetting": {
       "check": {

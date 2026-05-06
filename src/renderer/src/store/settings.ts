@@ -23,6 +23,7 @@ import type {
   ApiServerConfig,
   AssistantsSortType,
   CodeStyleVarious,
+  ImageProcessMethod,
   LanguageVarious,
   MathEngine,
   MinAppRegionFilter,
@@ -248,6 +249,7 @@ export interface SettingsState {
   // API Server
   apiServer: ApiServerConfig
   showMessageOutline: boolean
+  imageProcessMethod: ImageProcessMethod
 }
 
 export type MultiModelMessageStyle = 'horizontal' | 'vertical' | 'fold' | 'grid'
@@ -449,7 +451,8 @@ export const initialState: SettingsState = {
     port: API_SERVER_DEFAULTS.PORT,
     apiKey: `cs-sk-${uuid()}`
   },
-  showMessageOutline: false
+  showMessageOutline: false,
+  imageProcessMethod: 'ocr'
 }
 
 const settingsSlice = createSlice({
@@ -899,6 +902,9 @@ const settingsSlice = createSlice({
     },
     setShowMessageOutline: (state, action: PayloadAction<boolean>) => {
       state.showMessageOutline = action.payload
+    },
+    setImageProcessMethod: (state, action: PayloadAction<ImageProcessMethod>) => {
+      state.imageProcessMethod = action.payload
     }
   }
 })
@@ -1030,6 +1036,7 @@ export const {
   setEnableDeveloperMode,
   setNavbarPosition,
   setShowMessageOutline,
+  setImageProcessMethod,
   // API Server actions
   setApiServerEnabled,
   setApiServerPort,

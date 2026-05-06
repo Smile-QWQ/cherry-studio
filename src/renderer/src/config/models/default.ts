@@ -7,6 +7,19 @@ export const qwenModel: Model = {
   group: 'Qwen'
 }
 
+export const DEFAULT_MODELS = {
+  assistant: qwenModel,
+  quick: qwenModel,
+  translate: qwenModel,
+  quickAssistant: qwenModel,
+  vision: {
+    id: 'gemini-2.5-flash-image-preview',
+    name: 'Gemini 2.5 Flash Image',
+    provider: 'gemini',
+    group: 'Gemini 2.5'
+  } satisfies Model
+} as const
+
 export const SYSTEM_MODELS: Record<SystemProviderId | 'defaultModel', Model[]> = {
   defaultModel: [
     // Default assistant model

@@ -9,9 +9,10 @@ import {
   isWebSearchModel
 } from '@renderer/config/models'
 import db from '@renderer/databases'
-import { useAssistant } from '@renderer/hooks/useAssistant'
+import { useAssistant, useDefaultModel } from '@renderer/hooks/useAssistant'
 import { useInputText } from '@renderer/hooks/useInputText'
 import { useMessageOperations, useTopicLoading } from '@renderer/hooks/useMessageOperations'
+import { useOcrProviders } from '@renderer/hooks/useOcrProvider'
 import { useSettings } from '@renderer/hooks/useSettings'
 import { useShortcut } from '@renderer/hooks/useShortcuts'
 import { useTextareaResize } from '@renderer/hooks/useTextareaResize'
@@ -23,10 +24,17 @@ import {
   useInputbarToolsState
 } from '@renderer/pages/home/Inputbar/context/InputbarToolsProvider'
 import { getDefaultTopic } from '@renderer/services/AssistantService'
+import {
+  applyAttachmentProcessedResultsToBlocks,
+  buildAttachmentInjectedContent,
+  extractAttachmentTexts,
+  hasVisualExtractionResult
+} from '@renderer/services/AttachmentTextExtractionService'
 import { CacheService } from '@renderer/services/CacheService'
 import { EVENT_NAMES, EventEmitter } from '@renderer/services/EventService'
 import FileManager from '@renderer/services/FileManager'
 import { checkRateLimit, getUserMessage } from '@renderer/services/MessagesService'
+import * as RendererOcrService from '@renderer/services/ocr/OcrService'
 import { spanManagerService } from '@renderer/services/SpanManagerService'
 import { estimateTextTokens as estimateTxtTokens, estimateUserPromptUsage } from '@renderer/services/TokenService'
 import WebSearchService from '@renderer/services/WebSearchService'
@@ -60,6 +68,8 @@ const logger = loggerService.withContext('Inputbar')
 
 const INPUTBAR_DRAFT_CACHE_KEY = 'inputbar-draft'
 const DRAFT_CACHE_TTL = 24 * 60 * 60 * 1000 // 24 hours
+
+const isImageBlock = (block: { type: string }) => block.type === 'image'
 
 const getMentionedModelsCacheKey = (assistantId: string) => `inputbar-mentioned-models-${assistantId}`
 
@@ -159,7 +169,9 @@ const InputbarInner: FC<InputbarInnerProps> = ({ assistant: initialAssistant, se
   })
 
   const { assistant, addTopic, model, setModel, updateAssistant } = useAssistant(initialAssistant.id)
-  const { sendMessageShortcut, showInputEstimatedTokens, enableQuickPanelTriggers } = useSettings()
+  const { sendMessageShortcut, showInputEstimatedTokens, enableQuickPanelTriggers, imageProcessMethod } = useSettings()
+  const { visionModel } = useDefaultModel()
+  const { imageProvider } = useOcrProviders()
   const [estimateTokenCount, setEstimateTokenCount] = useState(0)
   const [contextCount, setContextCount] = useState({ current: 0, max: 0 })
 
@@ -187,8 +199,12 @@ const InputbarInner: FC<InputbarInnerProps> = ({ assistant: initialAssistant, se
   )
 
   const canAddImageFile = useMemo(() => {
-    return isVisionSupported || isGenerateImageSupported
-  }, [isGenerateImageSupported, isVisionSupported])
+    // 纯文本模型现在也允许先挂图片附件。
+    // 是否真正把图片送入模型，由发送前预处理分支决定：
+    // - 视觉模型：保持既有传图行为；
+    // - 非视觉模型：先抽取文本再注入正文。
+    return true
+  }, [])
 
   const canAddTextFile = useMemo(() => {
     return isVisionSupported || (!isVisionSupported && !isGenerateImageSupported)
@@ -256,9 +272,45 @@ const InputbarInner: FC<InputbarInnerProps> = ({ assistant: initialAssistant, se
         baseUserMessage.mentions = mentionedModels
       }
 
+      let extractionResults: Awaited<ReturnType<typeof extractAttachmentTexts>> | undefined
+
+      const shouldPreprocessAttachments = !isVisionSupported && !isGenerateImageSupported && uploadedFiles?.length
+      if (shouldPreprocessAttachments) {
+        // 只有“当前对话模型本身不支持视觉/生图”时，才把附件预处理结果注入正文。
+        // 这样可以避免破坏视觉模型原本的图片输入协议。
+        extractionResults = await extractAttachmentTexts({
+          files: uploadedFiles,
+          imageProcessMethod,
+          imageProvider,
+          visionModel,
+          ocr: (file, provider) => RendererOcrService.ocr(file as any, provider)
+        })
+
+        if (!text.trim() && extractionResults.hasProcessableAttachments && !extractionResults.hasAnySuccess) {
+          // 用户只发附件且全部抽取失败时，阻止发送。
+          // 否则纯文本模型会收到一个空消息体，既无正文也无可理解附件文本。
+          window.toast.error(t('chat.input.file_error'))
+          return
+        }
+
+        if (extractionResults.usedVisionFallbackToOcr) {
+          window.toast.warning(t('message.error.file.vision.model_fallback_to_ocr'))
+        }
+
+        baseUserMessage.content = buildAttachmentInjectedContent(text, extractionResults.text)
+      }
+
       baseUserMessage.usage = await estimateUserPromptUsage(baseUserMessage)
 
       const { message, blocks } = getUserMessage(baseUserMessage)
+      if (extractionResults && hasVisualExtractionResult(extractionResults)) {
+        // 保留原附件 block，同时把图片处理结果挂到 block metadata。
+        // 这给后续 UI 展示或重复发送去重留下扩展空间。
+        applyAttachmentProcessedResultsToBlocks(
+          blocks.filter(isImageBlock),
+          extractionResults.results.filter((result) => result.blockType === 'image')
+        )
+      }
       message.traceId = parent?.spanContext().traceId
 
       void dispatch(_sendMessage(message, blocks, assistant, topic.id))
@@ -284,7 +336,13 @@ const InputbarInner: FC<InputbarInnerProps> = ({ assistant: initialAssistant, se
     setFiles,
     setTimeoutTimer,
     resizeTextArea,
-    focusTextarea
+    focusTextarea,
+    imageProvider,
+    imageProcessMethod,
+    isGenerateImageSupported,
+    isVisionSupported,
+    t,
+    visionModel
   ])
 
   const tokenCountProps = useMemo(() => {

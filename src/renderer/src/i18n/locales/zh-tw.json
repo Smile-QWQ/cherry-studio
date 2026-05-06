@@ -2319,7 +2319,10 @@
       "fetchTopicName": "話題命名失敗",
       "file": {
         "process_failed": "檔案 {{name}} 無法處理",
-        "text_extraction_failed": "無法從 {{name}} 中擷取文字"
+        "text_extraction_failed": "無法從 {{name}} 中擷取文字",
+        "vision": {
+          "model_fallback_to_ocr": "[to be translated]:No vision model is configured, automatically fell back to OCR"
+        }
       },
       "get_embedding_dimensions": "取得嵌入維度失敗",
       "invalid": {
@@ -5006,6 +5009,9 @@
         "confirm_delete_message": "刪除訊息前確認",
         "confirm_regenerate_message": "重新產生訊息前確認",
         "enable_quick_triggers": "啟用 / 和 @ 觸發快捷選單",
+        "image_process": {
+          "title": "[to be translated]:Image processing"
+        },
         "paste_long_text_as_file": "將長文字貼上為檔案",
         "paste_long_text_threshold": "長文字長度",
         "send_shortcuts": "傳送快捷鍵",
@@ -5188,7 +5194,11 @@
       "translate_model_prompt_message": "請輸入翻譯模型提示詞",
       "translate_model_prompt_title": "翻譯模型提示詞",
       "use_assistant": "使用助手",
-      "use_model": "預設模型"
+      "use_model": "預設模型",
+      "vision": {
+        "description": "[to be translated]:When the current chat model does not support vision, use a vision model to extract image information and inject it into the message body before sending.",
+        "label": "[to be translated]:Vision model"
+      }
     },
     "moresetting": {
       "check": {

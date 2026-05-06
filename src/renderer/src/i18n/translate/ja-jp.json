@@ -2319,7 +2319,10 @@
       "fetchTopicName": "トピック名の取得に失敗しました",
       "file": {
         "process_failed": "ファイル {{name}} を処理できませんでした",
-        "text_extraction_failed": "{{name}}からテキストの抽出に失敗しました"
+        "text_extraction_failed": "{{name}}からテキストの抽出に失敗しました",
+        "vision": {
+          "model_fallback_to_ocr": "[to be translated]:No vision model is configured, automatically fell back to OCR"
+        }
       },
       "get_embedding_dimensions": "埋込み次元を取得できませんでした",
       "invalid": {
@@ -5006,6 +5009,9 @@
         "confirm_delete_message": "メッセージ削除前に確認",
         "confirm_regenerate_message": "メッセージ再生成前に確認",
         "enable_quick_triggers": "/ と @ を有効にしてクイックメニューを表示します。",
+        "image_process": {
+          "title": "[to be translated]:Image processing"
+        },
         "paste_long_text_as_file": "長いテキストをファイルとして貼り付け",
         "paste_long_text_threshold": "長いテキストの長さ",
         "send_shortcuts": "送信ショートカット",
@@ -5188,7 +5194,11 @@
       "translate_model_prompt_message": "翻訳モデルのプロンプトを入力してください",
       "translate_model_prompt_title": "翻訳モデルのプロンプト",
       "use_assistant": "アシスタントの活用",
-      "use_model": "デフォルトモデル"
+      "use_model": "デフォルトモデル",
+      "vision": {
+        "description": "[to be translated]:When the current chat model does not support vision, use a vision model to extract image information and inject it into the message body before sending.",
+        "label": "[to be translated]:Vision model"
+      }
     },
     "moresetting": {
       "check": {

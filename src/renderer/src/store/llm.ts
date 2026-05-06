@@ -17,7 +17,7 @@
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { createSlice } from '@reduxjs/toolkit'
 import { isLocalAi } from '@renderer/config/env'
-import { SYSTEM_MODELS } from '@renderer/config/models'
+import { DEFAULT_MODELS } from '@renderer/config/models'
 import { SYSTEM_PROVIDERS } from '@renderer/config/providers'
 import type { AwsBedrockAuthType, Model, Provider } from '@renderer/types'
 import { uniqBy } from 'lodash'
@@ -60,15 +60,17 @@ export interface LlmState {
   topicNamingModel: Model
   quickModel: Model
   translateModel: Model
+  visionModel: Model
   quickAssistantId: string
   settings: LlmSettings
 }
 
 export const initialState: LlmState = {
-  defaultModel: SYSTEM_MODELS.defaultModel[0],
-  topicNamingModel: SYSTEM_MODELS.defaultModel[1],
-  quickModel: SYSTEM_MODELS.defaultModel[1],
-  translateModel: SYSTEM_MODELS.defaultModel[2],
+  defaultModel: DEFAULT_MODELS.assistant,
+  topicNamingModel: DEFAULT_MODELS.quick,
+  quickModel: DEFAULT_MODELS.quick,
+  translateModel: DEFAULT_MODELS.translate,
+  visionModel: DEFAULT_MODELS.vision,
   quickAssistantId: '',
   providers: SYSTEM_PROVIDERS,
   settings: {
@@ -200,6 +202,9 @@ const llmSlice = createSlice({
     setTranslateModel: (state, action: PayloadAction<{ model: Model }>) => {
       state.translateModel = action.payload.model
     },
+    setVisionModel: (state, action: PayloadAction<{ model: Model }>) => {
+      state.visionModel = action.payload.model
+    },
 
     setQuickAssistantId: (state, action: PayloadAction<string>) => {
       state.quickAssistantId = action.payload
@@ -286,6 +291,7 @@ export const {
   setDefaultModel,
   setQuickModel,
   setTranslateModel,
+  setVisionModel,
   setQuickAssistantId,
   setOllamaKeepAliveTime,
   setLMStudioKeepAliveTime,

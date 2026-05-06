@@ -2319,7 +2319,10 @@
       "fetchTopicName": "Không thể đặt tên cho chủ đề",
       "file": {
         "process_failed": "Tệp {{name}} không thể được xử lý",
-        "text_extraction_failed": "Không thể trích xuất văn bản từ {{name}}"
+        "text_extraction_failed": "Không thể trích xuất văn bản từ {{name}}",
+        "vision": {
+          "model_fallback_to_ocr": "[to be translated]:No vision model is configured, automatically fell back to OCR"
+        }
       },
       "get_embedding_dimensions": "Không thể lấy kích thước embedding",
       "invalid": {
@@ -5006,6 +5009,9 @@
         "confirm_delete_message": "Xác nhận trước khi xóa tin nhắn",
         "confirm_regenerate_message": "Xác nhận trước khi tạo lại tin nhắn",
         "enable_quick_triggers": "Kích hoạt các kích hoạt / và @",
+        "image_process": {
+          "title": "[to be translated]:Image processing"
+        },
         "paste_long_text_as_file": "Dán văn bản dài dưới dạng tệp",
         "paste_long_text_threshold": "I’m ready—please provide the long text you’d like translated.",
         "send_shortcuts": "Gửi phím tắt",
@@ -5188,7 +5194,11 @@
       "translate_model_prompt_message": "Vui lòng nhập lời nhắc mô hình dịch",
       "translate_model_prompt_title": "Dịch Mô hình Nhắc",
       "use_assistant": "Sử dụng Trợ lý",
-      "use_model": "Mô hình Mặc định"
+      "use_model": "Mô hình Mặc định",
+      "vision": {
+        "description": "[to be translated]:When the current chat model does not support vision, use a vision model to extract image information and inject it into the message body before sending.",
+        "label": "[to be translated]:Vision model"
+      }
     },
     "moresetting": {
       "check": {

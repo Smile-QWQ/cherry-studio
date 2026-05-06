@@ -2319,7 +2319,10 @@
       "fetchTopicName": "Failed to name the topic",
       "file": {
         "process_failed": "File {{name}} could not be processed",
-        "text_extraction_failed": "Failed to extract text from {{name}}"
+        "text_extraction_failed": "Failed to extract text from {{name}}",
+        "vision": {
+          "model_fallback_to_ocr": "No vision model is configured, automatically fell back to OCR"
+        }
       },
       "get_embedding_dimensions": "Failed to get embedding dimensions",
       "invalid": {
@@ -5006,6 +5009,9 @@
         "confirm_delete_message": "Confirm before deleting messages",
         "confirm_regenerate_message": "Confirm before regenerating messages",
         "enable_quick_triggers": "Enable / and @ triggers",
+        "image_process": {
+          "title": "Image processing"
+        },
         "paste_long_text_as_file": "Paste long text as file",
         "paste_long_text_threshold": "Paste long text length",
         "send_shortcuts": "Send shortcuts",
@@ -5188,7 +5194,11 @@
       "translate_model_prompt_message": "Please enter the translate model prompt",
       "translate_model_prompt_title": "Translate Model Prompt",
       "use_assistant": "Use Assistant",
-      "use_model": "Default Model"
+      "use_model": "Default Model",
+      "vision": {
+        "description": "When the current chat model does not support vision, use a vision model to extract image information and inject it into the message body before sending.",
+        "label": "Vision model"
+      }
     },
     "moresetting": {
       "check": {

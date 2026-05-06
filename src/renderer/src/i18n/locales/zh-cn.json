@@ -2319,7 +2319,10 @@
       "fetchTopicName": "话题命名失败",
       "file": {
         "process_failed": "文件 {{name}} 无法处理",
-        "text_extraction_failed": "无法从 {{name}} 中提取文本"
+        "text_extraction_failed": "无法从 {{name}} 中提取文本",
+        "vision": {
+          "model_fallback_to_ocr": "未配置可用视觉模型，已自动回退为 OCR 处理"
+        }
       },
       "get_embedding_dimensions": "获取嵌入维度失败",
       "invalid": {
@@ -5006,6 +5009,9 @@
         "confirm_delete_message": "删除消息前确认",
         "confirm_regenerate_message": "重新生成消息前确认",
         "enable_quick_triggers": "启用 / 和 @ 触发快捷菜单",
+        "image_process": {
+          "title": "图片处理"
+        },
         "paste_long_text_as_file": "长文本粘贴为文件",
         "paste_long_text_threshold": "长文本长度",
         "send_shortcuts": "发送快捷键",
@@ -5188,7 +5194,11 @@
       "translate_model_prompt_message": "请输入翻译模型提示词",
       "translate_model_prompt_title": "翻译模型提示词",
       "use_assistant": "使用助手",
-      "use_model": "默认模型"
+      "use_model": "默认模型",
+      "vision": {
+        "description": "当当前对话模型不支持视觉时，可使用视觉模型先提取图片信息，再把结果注入发送正文。",
+        "label": "视觉模型"
+      }
     },
     "moresetting": {
       "check": {

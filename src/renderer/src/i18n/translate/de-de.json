@@ -2319,7 +2319,10 @@
       "fetchTopicName": "Themenname generieren fehlgeschlagen",
       "file": {
         "process_failed": "Datei {{name}} konnte nicht verarbeitet werden",
-        "text_extraction_failed": "Fehler beim Extrahieren von Text aus {{name}}"
+        "text_extraction_failed": "Fehler beim Extrahieren von Text aus {{name}}",
+        "vision": {
+          "model_fallback_to_ocr": "[to be translated]:No vision model is configured, automatically fell back to OCR"
+        }
       },
       "get_embedding_dimensions": "Embedding-Dimensionen abrufen fehlgeschlagen",
       "invalid": {
@@ -5006,6 +5009,9 @@
         "confirm_delete_message": "Vor Löschen von Nachrichten bestätigen",
         "confirm_regenerate_message": "Nachrichten vor Neugenerierung bestätigen",
         "enable_quick_triggers": "Aktivieren / und @ für Schnellmenü-Trigger",
+        "image_process": {
+          "title": "[to be translated]:Image processing"
+        },
         "paste_long_text_as_file": "Langen Text als Datei einfügen",
         "paste_long_text_threshold": "Länge langer Text",
         "send_shortcuts": "Senden-Shortcut",
@@ -5188,7 +5194,11 @@
       "translate_model_prompt_message": "Bitte Übersetzungsmodell-Prompt eingeben",
       "translate_model_prompt_title": "Übersetzungsmodell-Prompt",
       "use_assistant": "Assistent verwenden",
-      "use_model": "Standardmodell"
+      "use_model": "Standardmodell",
+      "vision": {
+        "description": "[to be translated]:When the current chat model does not support vision, use a vision model to extract image information and inject it into the message body before sending.",
+        "label": "[to be translated]:Vision model"
+      }
     },
     "moresetting": {
       "check": {

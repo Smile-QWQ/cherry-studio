@@ -2319,7 +2319,10 @@
       "fetchTopicName": "Не удалось назвать топик",
       "file": {
         "process_failed": "Файл {{name}} не удалось обработать",
-        "text_extraction_failed": "Не удалось извлечь текст из {{name}}"
+        "text_extraction_failed": "Не удалось извлечь текст из {{name}}",
+        "vision": {
+          "model_fallback_to_ocr": "[to be translated]:No vision model is configured, automatically fell back to OCR"
+        }
       },
       "get_embedding_dimensions": "Не удалось получить размерность встраивания",
       "invalid": {
@@ -5006,6 +5009,9 @@
         "confirm_delete_message": "Подтверждать перед удалением сообщений",
         "confirm_regenerate_message": "Подтверждать перед пересозданием сообщений",
         "enable_quick_triggers": "Включите / и @, чтобы вызвать быстрое меню.",
+        "image_process": {
+          "title": "[to be translated]:Image processing"
+        },
         "paste_long_text_as_file": "Вставлять длинный текст как файл",
         "paste_long_text_threshold": "Длина вставки длинного текста",
         "send_shortcuts": "Горячие клавиши для отправки",
@@ -5188,7 +5194,11 @@
       "translate_model_prompt_message": "Введите модель перевода",
       "translate_model_prompt_title": "Модель перевода",
       "use_assistant": "Использование ассистентов",
-      "use_model": "модель по умолчанию"
+      "use_model": "модель по умолчанию",
+      "vision": {
+        "description": "[to be translated]:When the current chat model does not support vision, use a vision model to extract image information and inject it into the message body before sending.",
+        "label": "[to be translated]:Vision model"
+      }
     },
     "moresetting": {
       "check": {

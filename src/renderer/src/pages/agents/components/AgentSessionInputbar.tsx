@@ -5,9 +5,11 @@ import { QuickPanelReservedSymbol, useQuickPanel } from '@renderer/components/Qu
 import { isGenerateImageModel, isVisionModel } from '@renderer/config/models'
 import { useAgent } from '@renderer/hooks/agents/useAgent'
 import { useSession } from '@renderer/hooks/agents/useSession'
+import { useDefaultModel } from '@renderer/hooks/useAssistant'
 import { useInputText } from '@renderer/hooks/useInputText'
 import { selectNewTopicLoading } from '@renderer/hooks/useMessageOperations'
 import { getModel } from '@renderer/hooks/useModel'
+import { useOcrProviders } from '@renderer/hooks/useOcrProvider'
 import { useSettings } from '@renderer/hooks/useSettings'
 import { useTextareaResize } from '@renderer/hooks/useTextareaResize'
 import { useTimer } from '@renderer/hooks/useTimer'
@@ -23,33 +25,38 @@ import { getInputbarConfig } from '@renderer/pages/home/Inputbar/registry'
 import type { ToolContext } from '@renderer/pages/home/Inputbar/types'
 import { TopicType } from '@renderer/pages/home/Inputbar/types'
 import { isSoulModeEnabled } from '@renderer/pages/settings/AgentSettings/shared'
+import {
+  applyAttachmentProcessedResultsToBlocks,
+  buildAttachmentInjectedContent,
+  extractAttachmentTexts,
+  hasVisualExtractionResult
+} from '@renderer/services/AttachmentTextExtractionService'
 import { CacheService } from '@renderer/services/CacheService'
 import { EVENT_NAMES, EventEmitter } from '@renderer/services/EventService'
+import FileManager from '@renderer/services/FileManager'
+import { getUserMessage } from '@renderer/services/MessagesService'
+import * as RendererOcrService from '@renderer/services/ocr/OcrService'
 import { pauseTrace } from '@renderer/services/SpanManagerService'
 import { estimateUserPromptUsage } from '@renderer/services/TokenService'
 import { useAppDispatch, useAppSelector } from '@renderer/store'
 import { newMessagesActions, selectMessagesForTopic } from '@renderer/store/newMessage'
 import { sendMessage as dispatchSendMessage } from '@renderer/store/thunk/messageThunk'
-import type { Assistant, Message, ThinkingOption } from '@renderer/types'
-import type { FileMetadata } from '@renderer/types'
-import type { MessageBlock } from '@renderer/types/newMessage'
-import { MessageBlockStatus } from '@renderer/types/newMessage'
+import type { Assistant, FileMetadata, ThinkingOption, Topic } from '@renderer/types'
 import { abortCompletion } from '@renderer/utils/abortController'
 import { buildAgentSessionTopicId } from '@renderer/utils/agentSession'
 import { getSendMessageShortcutLabel } from '@renderer/utils/input'
-import { createMainTextBlock, createMessage } from '@renderer/utils/messageUtils/create'
 import { documentExts, imageExts, textExts } from '@shared/config/constant'
 import type { FC } from 'react'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
-import { v4 as uuid } from 'uuid'
 
 const logger = loggerService.withContext('AgentSessionInputbar')
 
 const DRAFT_CACHE_TTL = 24 * 60 * 60 * 1000 // 24 hours
 
 const getAgentDraftCacheKey = (agentId: string) => `agent-session-draft-${agentId}`
+const isAttachmentBlock = (block: { type: string }) => block.type === 'image'
 
 type Props = {
   agentId: string
@@ -172,7 +179,9 @@ const AgentSessionInputbarInner: FC<InnerProps> = ({ assistant, agentId, session
     customHeight,
     setCustomHeight
   } = useTextareaResize({ maxHeight: 500, minHeight: 30 })
-  const { sendMessageShortcut, apiServer } = useSettings()
+  const { sendMessageShortcut, apiServer, imageProcessMethod } = useSettings()
+  const { visionModel } = useDefaultModel()
+  const { imageProvider } = useOcrProviders()
 
   const { t } = useTranslation()
   const quickPanel = useQuickPanel()
@@ -198,8 +207,10 @@ const AgentSessionInputbarInner: FC<InnerProps> = ({ assistant, agentId, session
 
   // Agent sessions don't support model mentions yet, so we only check the assistant's model
   const canAddImageFile = useMemo(() => {
-    return isVisionAssistant || isGenerateImageAssistant
-  }, [isVisionAssistant, isGenerateImageAssistant])
+    // Agent Session 与 Home Chat 对齐：允许先添加图片，
+    // 具体走原生传图还是发送前抽取，取决于当前会话模型能力。
+    return true
+  }, [])
 
   const canAddTextFile = useMemo(() => {
     return isVisionAssistant || (!isVisionAssistant && !isGenerateImageAssistant)
@@ -385,30 +396,71 @@ const AgentSessionInputbarInner: FC<InnerProps> = ({ assistant, agentId, session
     logger.info('Starting to send message')
 
     try {
-      const userMessageId = uuid()
-
-      // For agent sessions, append file paths to the text content instead of uploading files
+      const uploadedFiles = await FileManager.uploadFiles(files)
+      let extractionResults: Awaited<ReturnType<typeof extractAttachmentTexts>> | undefined
       let messageText = text
-      if (files.length > 0) {
-        const filePaths = files.map((file) => file.path).join('\n')
-        messageText = text ? `${text}\n\nAttached files:\n${filePaths}` : `Attached files:\n${filePaths}`
+
+      const shouldPreprocessAttachments = !isVisionAssistant && !isGenerateImageAssistant && uploadedFiles?.length
+      if (shouldPreprocessAttachments) {
+        // 这里替换掉旧的 “Attached files:\n<path>” 方案。
+        // 目标是让 Agent Session 发送给模型的内容，与 Home Chat 一样具备真实附件语义。
+        extractionResults = await extractAttachmentTexts({
+          files: uploadedFiles,
+          imageProcessMethod,
+          imageProvider,
+          visionModel,
+          ocr: (file, provider) => RendererOcrService.ocr(file as any, provider)
+        })
+
+        if (!text.trim() && extractionResults.hasProcessableAttachments && !extractionResults.hasAnySuccess) {
+          window.toast.error(t('chat.input.file_error'))
+          return
+        }
+
+        if (extractionResults.usedVisionFallbackToOcr) {
+          window.toast.warning(t('message.error.file.vision.model_fallback_to_ocr'))
+        }
+
+        messageText = buildAttachmentInjectedContent(text, extractionResults.text)
       }
 
-      const mainBlock = createMainTextBlock(userMessageId, messageText, {
-        status: MessageBlockStatus.SUCCESS
-      })
-      const userMessageBlocks: MessageBlock[] = [mainBlock]
+      const topicStub: Topic = {
+        // Agent Session 这里没有现成 Topic 实体可直接复用，
+        // 但 getUserMessage 依赖 topic/assistant 组合来生成标准用户消息结构，
+        // 因此构造最小 stub，复用 Home Chat 的 block/message 创建逻辑。
+        id: sessionTopicId,
+        assistantId: agentId,
+        name: sessionId,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        messages: []
+      }
 
-      // Calculate token usage for the user message
-      const usage = await estimateUserPromptUsage({ content: text })
-
-      const userMessage: Message = createMessage('user', sessionTopicId, agentId, {
-        id: userMessageId,
-        blocks: userMessageBlocks.map((block) => block?.id),
-        model: assistant.model,
-        modelId: assistant.model?.id,
-        usage
+      const { message: userMessage, blocks: userMessageBlocks } = getUserMessage({
+        assistant: {
+          ...assistant,
+          id: agentId,
+          topics: []
+        },
+        topic: topicStub,
+        content: messageText,
+        files: uploadedFiles,
+        usage: await estimateUserPromptUsage({
+          content: messageText,
+          files: uploadedFiles
+        })
       })
+
+      userMessage.model = assistant.model
+      userMessage.modelId = assistant.model?.id
+      if (extractionResults && hasVisualExtractionResult(extractionResults)) {
+        // 和 Home Chat 保持一致：只给图片 block 写 processedResult，
+        // 同时保留原始附件 block，不再退化为只发路径字符串。
+        applyAttachmentProcessedResultsToBlocks(
+          userMessageBlocks.filter(isAttachmentBlock),
+          extractionResults.results.filter((result) => result.blockType === 'image')
+        )
+      }
 
       const thinkingParams = assistant.model
         ? getAnthropicReasoningParams(
@@ -450,7 +502,13 @@ const AgentSessionInputbarInner: FC<InnerProps> = ({ assistant, agentId, session
     text,
     files,
     focusTextarea,
-    reasoningEffort
+    reasoningEffort,
+    imageProvider,
+    imageProcessMethod,
+    isGenerateImageAssistant,
+    isVisionAssistant,
+    t,
+    visionModel
   ])
 
   useEffect(() => {
