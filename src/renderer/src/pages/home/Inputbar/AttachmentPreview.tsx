@@ -15,6 +15,7 @@ import {
 import ConfirmDialog from '@renderer/components/ConfirmDialog'
 import CustomTag from '@renderer/components/Tags/CustomTag'
 import { useAttachment } from '@renderer/hooks/useAttachment'
+import type { AttachmentPreprocessState } from '@renderer/hooks/useAttachmentPreprocess'
 import FileManager from '@renderer/services/FileManager'
 import type { FileMetadata } from '@renderer/types'
 import { formatFileSize } from '@renderer/utils'
@@ -28,6 +29,8 @@ import styled from 'styled-components'
 interface Props {
   files: FileMetadata[]
   setFiles: (files: FileMetadata[]) => void
+  attachmentPreprocessStates?: Record<string, AttachmentPreprocessState>
+  onRemoveAttachment?: (file: FileMetadata) => void
   onAttachmentContextMenu?: (file: FileMetadata, event: MouseEvent<HTMLDivElement>) => void
 }
 
@@ -137,7 +140,47 @@ export const FileNameRender: FC<{ file: FileMetadata }> = ({ file }) => {
   )
 }
 
-const AttachmentPreview: FC<Props> = ({ files, setFiles, onAttachmentContextMenu }) => {
+const getAttachmentStatusText = (status?: AttachmentPreprocessState['status']) => {
+  switch (status) {
+    case 'uploading':
+      return '上传中'
+    case 'processing':
+      return '解析中'
+    case 'completed':
+      return '已完成'
+    case 'failed':
+      return '失败'
+    case 'pending':
+      return '等待中'
+    default:
+      return ''
+  }
+}
+
+const getAttachmentStatusColor = (status?: AttachmentPreprocessState['status']) => {
+  switch (status) {
+    case 'uploading':
+      return '#1677ff'
+    case 'processing':
+      return '#faad14'
+    case 'completed':
+      return '#52c41a'
+    case 'failed':
+      return '#ff4d4f'
+    case 'pending':
+      return '#8c8c8c'
+    default:
+      return '#37a5aa'
+  }
+}
+
+const AttachmentPreview: FC<Props> = ({
+  files,
+  setFiles,
+  attachmentPreprocessStates,
+  onRemoveAttachment,
+  onAttachmentContextMenu
+}) => {
   const { t } = useTranslation()
   const [contextMenu, setContextMenu] = useState<{
     file: FileMetadata
@@ -197,19 +240,38 @@ const AttachmentPreview: FC<Props> = ({ files, setFiles, onAttachmentContextMenu
   return (
     <>
       <ContentContainer>
-        {files.map((file) => (
-          <CustomTag
-            key={file.id}
-            icon={getFileIcon(file.ext)}
-            color="#37a5aa"
-            closable
-            onClose={() => setFiles(files.filter((f) => f.id !== file.id))}
-            onContextMenu={(event) => {
-              void handleContextMenu(file, event)
-            }}>
-            <FileNameRender file={file} />
-          </CustomTag>
-        ))}
+        {files.map((file) =>
+          (() => {
+            const preprocessState = attachmentPreprocessStates?.[file.id]
+            const statusText = getAttachmentStatusText(preprocessState?.status)
+            const statusColor = getAttachmentStatusColor(preprocessState?.status)
+            const tooltip = preprocessState?.failure?.error
+
+            return (
+              <CustomTag
+                key={file.id}
+                icon={getFileIcon(file.ext)}
+                color={statusColor}
+                tooltip={tooltip}
+                closable
+                onClose={() => {
+                  if (onRemoveAttachment) {
+                    onRemoveAttachment(file)
+                    return
+                  }
+                  setFiles(files.filter((f) => f.id !== file.id))
+                }}
+                onContextMenu={(event) => {
+                  void handleContextMenu(file, event)
+                }}>
+                <AttachmentTagContent>
+                  <FileNameRender file={file} />
+                  {statusText && <AttachmentStatusText>{statusText}</AttachmentStatusText>}
+                </AttachmentTagContent>
+              </CustomTag>
+            )
+          })()
+        )}
       </ContentContainer>
 
       {contextMenu && (
@@ -238,6 +300,18 @@ const FileName = styled.span`
   &:hover {
     text-decoration: underline;
   }
+`
+
+const AttachmentTagContent = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+`
+
+const AttachmentStatusText = styled.span`
+  font-size: 11px;
+  opacity: 0.85;
 `
 
 export default AttachmentPreview

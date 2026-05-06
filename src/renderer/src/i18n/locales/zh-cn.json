@@ -991,7 +991,8 @@
         "vision_model": "视觉模型"
       },
       "title": "附件提取结果",
-      "truncated": "已截断"
+      "truncated": "已截断",
+      "wait_for_completion": "请等待附件解析完成后再发送"
     }
   },
   "auth": {

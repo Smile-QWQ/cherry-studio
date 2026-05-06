@@ -4,6 +4,7 @@ import { ActionIconButton } from '@renderer/components/Buttons'
 import type { QuickPanelTriggerInfo } from '@renderer/components/QuickPanel'
 import { QuickPanelReservedSymbol, QuickPanelView, useQuickPanel } from '@renderer/components/QuickPanel'
 import TranslateButton from '@renderer/components/TranslateButton'
+import type { AttachmentPreprocessState } from '@renderer/hooks/useAttachmentPreprocess'
 import { useRuntime } from '@renderer/hooks/useRuntime'
 import { useSettings } from '@renderer/hooks/useSettings'
 import { useTimer } from '@renderer/hooks/useTimer'
@@ -70,6 +71,9 @@ export interface InputbarCoreProps {
   // Pinned content that floats above the inputbar (uses absolute positioning)
   pinnedContent?: React.ReactNode
 
+  attachmentPreprocessStates?: Record<string, AttachmentPreprocessState>
+  onRemoveAttachment?: (file: FileMetadata) => void
+
   // Override the user preference for quick panel triggers
   forceEnableQuickPanelTriggers?: boolean
 }
@@ -121,6 +125,8 @@ export const InputbarCore: FC<InputbarCoreProps> = ({
   rightToolbar,
   topContent,
   pinnedContent,
+  attachmentPreprocessStates,
+  onRemoveAttachment,
   forceEnableQuickPanelTriggers
 }) => {
   const config = useMemo(() => getInputbarConfig(scope), [scope])
@@ -649,7 +655,13 @@ export const InputbarCore: FC<InputbarCoreProps> = ({
             <HolderOutlined style={{ fontSize: 12 }} />
           </DragHandle>
           {files.length > 0 && (
-            <AttachmentPreview files={files} setFiles={setFiles} onAttachmentContextMenu={appendTxtContentToInput} />
+            <AttachmentPreview
+              files={files}
+              setFiles={setFiles}
+              attachmentPreprocessStates={attachmentPreprocessStates}
+              onRemoveAttachment={onRemoveAttachment}
+              onAttachmentContextMenu={appendTxtContentToInput}
+            />
           )}
           {topContent}
 

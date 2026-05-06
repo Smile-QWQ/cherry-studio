@@ -991,7 +991,8 @@
         "vision_model": "[to be translated]:Vision model"
       },
       "title": "[to be translated]:Attachment extraction results",
-      "truncated": "[to be translated]:Truncated"
+      "truncated": "[to be translated]:Truncated",
+      "wait_for_completion": "[to be translated]:Please wait for attachment extraction to finish before sending"
     }
   },
   "auth": {

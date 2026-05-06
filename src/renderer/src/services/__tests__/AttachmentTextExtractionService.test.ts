@@ -171,6 +171,11 @@ describe('AttachmentTextExtractionService', () => {
     expect(result.results[0]?.text).toContain('vision result')
     expect(result.results[0]?.source).toBe('vision_model')
     expect(result.results[0]?.blockType).toBe('image')
+
+    const promptText = completionsMock.mock.calls[0]?.[1]?.messages?.[0]?.content?.[0]?.text
+    expect(promptText).toContain('图片内容提取器')
+    expect(promptText).toContain('不要回答用户问题')
+    expect(promptText).toContain('不要解释代码含义')
   })
 
   it('falls back to OCR when vision_model is selected but no vision model is configured', async () => {

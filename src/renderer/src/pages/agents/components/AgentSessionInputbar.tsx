@@ -6,6 +6,7 @@ import { isGenerateImageModel, isVisionModel } from '@renderer/config/models'
 import { useAgent } from '@renderer/hooks/agents/useAgent'
 import { useSession } from '@renderer/hooks/agents/useSession'
 import { useDefaultModel } from '@renderer/hooks/useAssistant'
+import { useAttachmentPreprocess } from '@renderer/hooks/useAttachmentPreprocess'
 import { useInputText } from '@renderer/hooks/useInputText'
 import { selectNewTopicLoading } from '@renderer/hooks/useMessageOperations'
 import { getModel } from '@renderer/hooks/useModel'
@@ -27,14 +28,12 @@ import { TopicType } from '@renderer/pages/home/Inputbar/types'
 import { isSoulModeEnabled } from '@renderer/pages/settings/AgentSettings/shared'
 import {
   applyAttachmentProcessedResultsToBlocks,
-  extractAttachmentTexts,
   hasVisualExtractionResult
 } from '@renderer/services/AttachmentTextExtractionService'
 import { CacheService } from '@renderer/services/CacheService'
 import { EVENT_NAMES, EventEmitter } from '@renderer/services/EventService'
 import FileManager from '@renderer/services/FileManager'
 import { getUserMessage } from '@renderer/services/MessagesService'
-import * as RendererOcrService from '@renderer/services/ocr/OcrService'
 import { pauseTrace } from '@renderer/services/SpanManagerService'
 import { estimateUserPromptUsage } from '@renderer/services/TokenService'
 import { useAppDispatch, useAppSelector } from '@renderer/store'
@@ -215,6 +214,11 @@ const AgentSessionInputbarInner: FC<InnerProps> = ({ assistant, agentId, session
     return isVisionAssistant || (!isVisionAssistant && !isGenerateImageAssistant)
   }, [isVisionAssistant, isGenerateImageAssistant])
 
+  const shouldPreprocessAttachments = useMemo(
+    () => !isVisionAssistant && !isGenerateImageAssistant,
+    [isGenerateImageAssistant, isVisionAssistant]
+  )
+
   // Update the couldAddImageFile state when the model changes
   useEffect(() => {
     setCouldAddImageFile(canAddImageFile)
@@ -346,6 +350,16 @@ const AgentSessionInputbarInner: FC<InnerProps> = ({ assistant, agentId, session
 
   const sendDisabled = (inputEmpty && files.length === 0) || !apiServer.enabled
 
+  const { attachmentPreprocessSnapshot, attachmentPreprocessStates, removeAttachment } = useAttachmentPreprocess({
+    files,
+    setFiles,
+    enabled: shouldPreprocessAttachments,
+    allowDocuments: canAddTextFile,
+    imageProcessMethod,
+    imageProvider,
+    visionModel
+  })
+
   const streamingAskIds = useMemo(() => {
     if (!topicMessages) {
       return []
@@ -395,27 +409,25 @@ const AgentSessionInputbarInner: FC<InnerProps> = ({ assistant, agentId, session
     logger.info('Starting to send message')
 
     try {
-      const uploadedFiles = await FileManager.uploadFiles(files)
-      let extractionResults: Awaited<ReturnType<typeof extractAttachmentTexts>> | undefined
-
-      const shouldPreprocessAttachments = !isVisionAssistant && !isGenerateImageAssistant && uploadedFiles?.length
+      const uploadedFiles = shouldPreprocessAttachments
+        ? await Promise.all(files.map((file) => (FileManager.isStoredFile(file) ? file : FileManager.uploadFile(file))))
+        : await FileManager.uploadFiles(files)
       if (shouldPreprocessAttachments) {
-        // 这里替换掉旧的 “Attached files:\n<path>” 方案。
-        // 目标是让 Agent Session 发送给模型的内容，与 Home Chat 一样具备真实附件语义。
-        extractionResults = await extractAttachmentTexts({
-          files: uploadedFiles,
-          imageProcessMethod,
-          imageProvider,
-          visionModel,
-          ocr: (file, provider) => RendererOcrService.ocr(file as any, provider)
-        })
+        if (attachmentPreprocessSnapshot.hasPendingProcessableAttachments) {
+          window.toast.warning(t('attachment.extraction.wait_for_completion', '请等待附件解析完成后再发送'))
+          return
+        }
 
-        if (!text.trim() && extractionResults.hasProcessableAttachments && !extractionResults.hasAnySuccess) {
+        if (
+          !text.trim() &&
+          attachmentPreprocessSnapshot.hasProcessableAttachments &&
+          !attachmentPreprocessSnapshot.hasAnySuccess
+        ) {
           window.toast.error(t('chat.input.file_error'))
           return
         }
 
-        if (extractionResults.usedVisionFallbackToOcr) {
+        if (attachmentPreprocessSnapshot.usedVisionFallbackToOcr) {
           window.toast.warning(t('message.error.file.vision.model_fallback_to_ocr'))
         }
       }
@@ -442,12 +454,13 @@ const AgentSessionInputbarInner: FC<InnerProps> = ({ assistant, agentId, session
         content: text,
         files: uploadedFiles,
         attachmentExtraction:
-          extractionResults && (extractionResults.hasAnySuccess || extractionResults.failed.length > 0)
+          shouldPreprocessAttachments &&
+          (attachmentPreprocessSnapshot.hasAnySuccess || attachmentPreprocessSnapshot.failed.length > 0)
             ? {
-                items: extractionResults.results,
-                failed: extractionResults.failed,
-                totalInjectedChars: extractionResults.totalInjectedChars,
-                usedVisionFallbackToOcr: extractionResults.usedVisionFallbackToOcr
+                items: attachmentPreprocessSnapshot.items,
+                failed: attachmentPreprocessSnapshot.failed,
+                totalInjectedChars: attachmentPreprocessSnapshot.totalInjectedChars,
+                usedVisionFallbackToOcr: attachmentPreprocessSnapshot.usedVisionFallbackToOcr
               }
             : undefined,
         usage: await estimateUserPromptUsage({
@@ -458,12 +471,12 @@ const AgentSessionInputbarInner: FC<InnerProps> = ({ assistant, agentId, session
 
       userMessage.model = assistant.model
       userMessage.modelId = assistant.model?.id
-      if (extractionResults && hasVisualExtractionResult(extractionResults)) {
+      if (shouldPreprocessAttachments && hasVisualExtractionResult(attachmentPreprocessSnapshot)) {
         // 和 Home Chat 保持一致：只给图片 block 写 processedResult，
         // 同时保留原始附件 block，不再退化为只发路径字符串。
         applyAttachmentProcessedResultsToBlocks(
           userMessageBlocks.filter(isAttachmentBlock),
-          extractionResults.results.filter((result) => result.blockType === 'image')
+          attachmentPreprocessSnapshot.items.filter((result) => result.blockType === 'image')
         )
       }
 
@@ -508,12 +521,9 @@ const AgentSessionInputbarInner: FC<InnerProps> = ({ assistant, agentId, session
     files,
     focusTextarea,
     reasoningEffort,
-    imageProvider,
-    imageProcessMethod,
-    isGenerateImageAssistant,
-    isVisionAssistant,
-    t,
-    visionModel
+    attachmentPreprocessSnapshot,
+    shouldPreprocessAttachments,
+    t
   ])
 
   useEffect(() => {
@@ -578,6 +588,8 @@ const AgentSessionInputbarInner: FC<InnerProps> = ({ assistant, agentId, session
       isLoading={canAbort}
       handleSendMessage={sendMessage}
       leftToolbar={leftToolbar}
+      attachmentPreprocessStates={attachmentPreprocessStates}
+      onRemoveAttachment={removeAttachment}
       forceEnableQuickPanelTriggers
     />
   )

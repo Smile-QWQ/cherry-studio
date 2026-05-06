@@ -991,7 +991,8 @@
         "vision_model": "Vision model"
       },
       "title": "Attachment extraction results",
-      "truncated": "Truncated"
+      "truncated": "Truncated",
+      "wait_for_completion": "Please wait for attachment extraction to finish before sending"
     }
   },
   "auth": {
