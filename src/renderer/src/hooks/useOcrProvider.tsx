@@ -10,7 +10,7 @@ import type { ImageOcrProvider, OcrProvider, OcrProviderConfig, WeChatOcrDetecti
 import { isBuiltinOcrProvider, isBuiltinOcrProviderId, isImageOcrProvider } from '@renderer/types'
 import { Avatar } from 'antd'
 import { FileQuestionMarkIcon, MessageCircleMoreIcon, MonitorIcon } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDispatch } from 'react-redux'
 
@@ -135,18 +135,10 @@ export const useOcrProviders = () => {
     void refreshWechatDetection()
   }, [refreshWechatDetection])
 
-  const recommendedImageProviderId = useMemo(() => {
-    if (wechatDetection?.available) {
-      return 'wechat_ocr'
-    }
-    return DEFAULT_OCR_PROVIDER.image.id
-  }, [wechatDetection?.available])
-
   return {
     providers,
     imageProvider,
     wechatDetection,
-    recommendedImageProviderId,
     refreshWechatDetection,
     addProvider,
     removeProvider,

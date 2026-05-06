@@ -2889,7 +2889,7 @@
   "ocr": {
     "builtin": {
       "system": "系统 OCR",
-      "wechat_ocr": "微信 OCR（推荐）"
+      "wechat_ocr": "微信 OCR"
     },
     "error": {
       "provider": {
