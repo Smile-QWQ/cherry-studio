@@ -30,7 +30,7 @@ import {
 } from '@renderer/utils'
 import { updateCodeBlock } from '@renderer/utils/markdown'
 import { getMainTextContent } from '@renderer/utils/messageUtils/find'
-import { isTextLikeBlock } from '@renderer/utils/messageUtils/is'
+import { isAttachmentExtractionBlock, isTextLikeBlock } from '@renderer/utils/messageUtils/is'
 import { last } from 'lodash'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -206,7 +206,12 @@ const Messages: React.FC<MessagesProps> = ({ assistant, topic, setActiveTopic, o
           const msgBlock = messageBlocksSelectors.selectById(store.getState(), msgBlockId)
 
           // FIXME: 目前 error block 没有 content
-          if (msgBlock && isTextLikeBlock(msgBlock) && msgBlock.type !== MessageBlockType.ERROR) {
+          if (
+            msgBlock &&
+            isTextLikeBlock(msgBlock) &&
+            msgBlock.type !== MessageBlockType.ERROR &&
+            !isAttachmentExtractionBlock(msgBlock)
+          ) {
             try {
               const updatedRaw = updateCodeBlock(msgBlock.content, codeBlockId, newContent)
               const updatedBlock: MessageBlock = {

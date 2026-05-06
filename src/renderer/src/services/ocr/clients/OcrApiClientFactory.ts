@@ -17,11 +17,7 @@ export class OcrApiClientFactory {
       config: provider.config
     })
 
-    let instance: OcrBaseApiClient
-
-    // Extend other clients here
-    // eslint-disable-next-line prefer-const
-    instance = new OcrExampleApiClient(provider)
+    const instance: OcrBaseApiClient = new OcrExampleApiClient(provider)
 
     return instance
   }

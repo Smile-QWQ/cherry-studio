@@ -26,7 +26,6 @@ import {
 import { getDefaultTopic } from '@renderer/services/AssistantService'
 import {
   applyAttachmentProcessedResultsToBlocks,
-  buildAttachmentInjectedContent,
   extractAttachmentTexts,
   hasVisualExtractionResult
 } from '@renderer/services/AttachmentTextExtractionService'
@@ -48,7 +47,11 @@ import {
   type Topic,
   TopicType
 } from '@renderer/types'
-import type { MessageInputBaseParams } from '@renderer/types/newMessage'
+import type {
+  AttachmentExtractionFailure,
+  AttachmentExtractionItem,
+  MessageInputBaseParams
+} from '@renderer/types/newMessage'
 import { delay } from '@renderer/utils'
 import { getSendMessageShortcutLabel } from '@renderer/utils/input'
 import { documentExts, imageExts, textExts } from '@shared/config/constant'
@@ -202,7 +205,7 @@ const InputbarInner: FC<InputbarInnerProps> = ({ assistant: initialAssistant, se
     // 纯文本模型现在也允许先挂图片附件。
     // 是否真正把图片送入模型，由发送前预处理分支决定：
     // - 视觉模型：保持既有传图行为；
-    // - 非视觉模型：先抽取文本再注入正文。
+    // - 非视觉模型：先抽取文本，再通过隐藏上下文注入给模型。
     return true
   }, [])
 
@@ -264,7 +267,14 @@ const InputbarInner: FC<InputbarInnerProps> = ({ assistant: initialAssistant, se
     try {
       const uploadedFiles = await FileManager.uploadFiles(files)
 
-      const baseUserMessage: MessageInputBaseParams = { assistant, topic, content: text }
+      const baseUserMessage: MessageInputBaseParams & {
+        attachmentExtraction?: {
+          items: AttachmentExtractionItem[]
+          failed: AttachmentExtractionFailure[]
+          totalInjectedChars: number
+          usedVisionFallbackToOcr: boolean
+        }
+      } = { assistant, topic, content: text }
       if (uploadedFiles) {
         baseUserMessage.files = uploadedFiles
       }
@@ -276,7 +286,8 @@ const InputbarInner: FC<InputbarInnerProps> = ({ assistant: initialAssistant, se
 
       const shouldPreprocessAttachments = !isVisionSupported && !isGenerateImageSupported && uploadedFiles?.length
       if (shouldPreprocessAttachments) {
-        // 只有“当前对话模型本身不支持视觉/生图”时，才把附件预处理结果注入正文。
+        // 只有“当前对话模型本身不支持视觉/生图”时，才需要先提取附件文本。
+        // 这些结果会进入独立的附件提取结果块，并作为隐藏上下文发给模型。
         // 这样可以避免破坏视觉模型原本的图片输入协议。
         extractionResults = await extractAttachmentTexts({
           files: uploadedFiles,
@@ -297,7 +308,14 @@ const InputbarInner: FC<InputbarInnerProps> = ({ assistant: initialAssistant, se
           window.toast.warning(t('message.error.file.vision.model_fallback_to_ocr'))
         }
 
-        baseUserMessage.content = buildAttachmentInjectedContent(text, extractionResults.text)
+        if (extractionResults.hasAnySuccess || extractionResults.failed.length > 0) {
+          baseUserMessage.attachmentExtraction = {
+            items: extractionResults.results,
+            failed: extractionResults.failed,
+            totalInjectedChars: extractionResults.totalInjectedChars,
+            usedVisionFallbackToOcr: extractionResults.usedVisionFallbackToOcr
+          }
+        }
       }
 
       baseUserMessage.usage = await estimateUserPromptUsage(baseUserMessage)

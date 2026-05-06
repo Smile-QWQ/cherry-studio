@@ -982,6 +982,18 @@
     },
     "title": "助手"
   },
+  "attachment": {
+    "extraction": {
+      "fallback_to_ocr": "视觉失败后已回退 OCR",
+      "source": {
+        "document": "文档抽取",
+        "ocr": "图片 OCR",
+        "vision_model": "视觉模型"
+      },
+      "title": "附件提取结果",
+      "truncated": "已截断"
+    }
+  },
   "auth": {
     "error": "自动获取密钥失败，请手动获取",
     "get_key": "获取",
@@ -2876,7 +2888,8 @@
   },
   "ocr": {
     "builtin": {
-      "system": "系统 OCR"
+      "system": "系统 OCR",
+      "wechat_ocr": "微信 OCR（推荐）"
     },
     "error": {
       "provider": {
@@ -2896,6 +2909,18 @@
       "provider": {
         "fallback": "已回退到 {{name}}，这可能导致问题"
       }
+    },
+    "wechat": {
+      "available": "已检测到，可用",
+      "bridge_path": "桥接 DLL 路径",
+      "detecting": "正在检测",
+      "install_path": "微信安装路径",
+      "installed_but_unavailable": "已安装，但 OCR 组件不可用",
+      "not_installed": "未检测到微信 OCR",
+      "ocr_path": "OCR 组件路径",
+      "reason": "不可用原因",
+      "refresh": "重新检测",
+      "status": "检测状态"
     }
   },
   "ollama": {
@@ -6041,6 +6066,12 @@
   },
   "warning": {
     "missing_provider": "供应商不存在，已回退到默认供应商 {{provider}}。这可能导致问题。"
+  },
+  "wechat_ocr": {
+    "bridge_missing": "未找到 WeChat OCR 桥接 DLL",
+    "component_missing": "缺少微信 OCR 组件或微信运行时目录",
+    "not_detected": "未检测到微信安装或 OCR 组件",
+    "only_supported_on_windows": "WeChat OCR 仅支持 Windows"
   },
   "words": {
     "knowledgeGraph": "知识图谱",

@@ -72,6 +72,7 @@ export function filterEmptyMessages(messages: Message[]): Message[] {
         [
           MessageBlockType.IMAGE,
           MessageBlockType.FILE,
+          MessageBlockType.ATTACHMENT_EXTRACTION,
           MessageBlockType.CODE,
           MessageBlockType.TOOL,
           MessageBlockType.CITATION

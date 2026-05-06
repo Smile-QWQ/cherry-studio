@@ -27,7 +27,6 @@ import { TopicType } from '@renderer/pages/home/Inputbar/types'
 import { isSoulModeEnabled } from '@renderer/pages/settings/AgentSettings/shared'
 import {
   applyAttachmentProcessedResultsToBlocks,
-  buildAttachmentInjectedContent,
   extractAttachmentTexts,
   hasVisualExtractionResult
 } from '@renderer/services/AttachmentTextExtractionService'
@@ -398,7 +397,6 @@ const AgentSessionInputbarInner: FC<InnerProps> = ({ assistant, agentId, session
     try {
       const uploadedFiles = await FileManager.uploadFiles(files)
       let extractionResults: Awaited<ReturnType<typeof extractAttachmentTexts>> | undefined
-      let messageText = text
 
       const shouldPreprocessAttachments = !isVisionAssistant && !isGenerateImageAssistant && uploadedFiles?.length
       if (shouldPreprocessAttachments) {
@@ -420,8 +418,6 @@ const AgentSessionInputbarInner: FC<InnerProps> = ({ assistant, agentId, session
         if (extractionResults.usedVisionFallbackToOcr) {
           window.toast.warning(t('message.error.file.vision.model_fallback_to_ocr'))
         }
-
-        messageText = buildAttachmentInjectedContent(text, extractionResults.text)
       }
 
       const topicStub: Topic = {
@@ -443,10 +439,19 @@ const AgentSessionInputbarInner: FC<InnerProps> = ({ assistant, agentId, session
           topics: []
         },
         topic: topicStub,
-        content: messageText,
+        content: text,
         files: uploadedFiles,
+        attachmentExtraction:
+          extractionResults && (extractionResults.hasAnySuccess || extractionResults.failed.length > 0)
+            ? {
+                items: extractionResults.results,
+                failed: extractionResults.failed,
+                totalInjectedChars: extractionResults.totalInjectedChars,
+                usedVisionFallbackToOcr: extractionResults.usedVisionFallbackToOcr
+              }
+            : undefined,
         usage: await estimateUserPromptUsage({
-          content: messageText,
+          content: text,
           files: uploadedFiles
         })
       })

@@ -8,12 +8,14 @@ import { loggerService } from '@logger'
 import { isVisionModel } from '@renderer/config/models'
 import type { Message, Model } from '@renderer/types'
 import type {
+  AttachmentExtractionMessageBlock,
   FileMessageBlock,
   ImageMessageBlock,
   MainTextMessageBlock,
   ThinkingMessageBlock
 } from '@renderer/types/newMessage'
 import {
+  findAttachmentExtractionBlocks,
   findFileBlocks,
   findImageBlocks,
   findMainTextBlocks,
@@ -48,10 +50,18 @@ export async function convertMessageToSdkParam(
   const content = getMainTextContent(message)
   const fileBlocks = findFileBlocks(message)
   const imageBlocks = findImageBlocks(message)
+  const attachmentExtractionBlocks = findAttachmentExtractionBlocks(message)
   const reasoningBlocks = findThinkingBlocks(message)
   const mainTextBlocks = findMainTextBlocks(message)
   if (message.role === 'user' || message.role === 'system') {
-    return convertMessageToUserModelMessage(content, fileBlocks, imageBlocks, isVisionModel, model)
+    return convertMessageToUserModelMessage(
+      content,
+      fileBlocks,
+      imageBlocks,
+      attachmentExtractionBlocks,
+      isVisionModel,
+      model
+    )
   } else {
     return convertMessageToAssistantModelMessage(
       content,
@@ -111,6 +121,7 @@ async function convertMessageToUserModelMessage(
   content: string,
   fileBlocks: FileMessageBlock[],
   imageBlocks: ImageMessageBlock[],
+  attachmentExtractionBlocks: AttachmentExtractionMessageBlock[],
   isVisionModel = false,
   model?: Model
 ): Promise<UserModelMessage | (UserModelMessage | SystemModelMessage)[]> {
@@ -164,10 +175,60 @@ async function convertMessageToUserModelMessage(
     }
   }
 
+  const attachmentExtractionText = buildHiddenAttachmentExtractionText(attachmentExtractionBlocks)
+  if (attachmentExtractionText) {
+    parts.push({ type: 'text', text: attachmentExtractionText })
+  }
+
   return {
     role: 'user',
     content: parts
   }
+}
+
+function buildHiddenAttachmentExtractionText(blocks: AttachmentExtractionMessageBlock[]) {
+  const block = blocks[0]
+  if (!block) {
+    return ''
+  }
+
+  const getSourceLabel = (source: AttachmentExtractionMessageBlock['items'][number]['source']) => {
+    switch (source) {
+      case 'ocr':
+        return '图片 OCR'
+      case 'vision_model':
+        return '视觉模型'
+      case 'document':
+        return '文档抽取'
+    }
+  }
+
+  const sections = [
+    '[附件提取隐藏上下文]',
+    '以下内容来自当前消息附件的提取结果，不是用户正文。',
+    '图片 OCR 结果可能存在噪声、顺序错乱或漏字。',
+    '请仅基于这些提取文本做保守判断，不要声称自己直接看到了图片本身。'
+  ]
+
+  if (block.items.length > 0) {
+    sections.push('', '【可用附件提取结果】')
+    block.items.forEach((item, index) => {
+      const truncatedHint = item.truncated ? '\n[该附件结果已截断]' : ''
+      sections.push(
+        `[附件 ${index + 1}] ${item.fileName}\n来源：${getSourceLabel(item.source)}\n${item.text}${truncatedHint}`,
+        ''
+      )
+    })
+  }
+
+  if (block.failed.length > 0) {
+    sections.push('【附件提取失败】')
+    block.failed.forEach((item, index) => {
+      sections.push(`[失败 ${index + 1}] ${item.fileName}\n原因：${item.error}`, '')
+    })
+  }
+
+  return sections.join('\n').trim()
 }
 
 /**

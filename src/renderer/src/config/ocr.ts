@@ -6,6 +6,7 @@ import type {
   OcrProviderCapability,
   OcrSystemProvider,
   OcrTesseractProvider,
+  OcrWechatProvider,
   TesseractLangCode,
   TranslateLanguageCode
 } from '@renderer/types'
@@ -31,13 +32,24 @@ const systemOcr: OcrSystemProvider = {
   id: 'system',
   name: 'System',
   config: {
-    langs: isWin ? ['en-us'] : undefined
+    langs: isWin ? ['zh-cn', 'en-us'] : undefined
   },
   capabilities: {
     image: true
     // pdf: true
   }
 } as const satisfies OcrSystemProvider
+
+const wechatOcr: OcrWechatProvider = {
+  id: 'wechat_ocr',
+  name: 'WeChat OCR',
+  config: {
+    available: false
+  },
+  capabilities: {
+    image: true
+  }
+} as const satisfies OcrWechatProvider
 
 const ppocrOcr: OcrPpocrProvider = {
   id: 'paddleocr',
@@ -64,6 +76,7 @@ const ovOcr: OcrOvProvider = {
 } as const satisfies OcrOvProvider
 
 export const BUILTIN_OCR_PROVIDERS_MAP = {
+  wechat_ocr: wechatOcr,
   tesseract,
   system: systemOcr,
   paddleocr: ppocrOcr,
@@ -73,7 +86,7 @@ export const BUILTIN_OCR_PROVIDERS_MAP = {
 export const BUILTIN_OCR_PROVIDERS: BuiltinOcrProvider[] = Object.values(BUILTIN_OCR_PROVIDERS_MAP)
 
 export const DEFAULT_OCR_PROVIDER = {
-  image: isWin || isMac ? systemOcr : tesseract
+  image: isWin ? tesseract : isMac ? systemOcr : tesseract
 } as const satisfies Record<OcrProviderCapability, BuiltinOcrProvider>
 
 export const TESSERACT_LANG_MAP: Record<TranslateLanguageCode, TesseractLangCode> = {

@@ -4,14 +4,20 @@ import { getProviderByModel } from '@renderer/services/AssistantService'
 import type { Assistant, FileMetadata, ImageProcessMethod, Model, OcrProvider } from '@renderer/types'
 import { FILE_TYPE } from '@renderer/types'
 import type { StreamTextParams } from '@renderer/types/aiCoreTypes'
-import type { FileMessageBlock, ImageMessageBlock, MessageBlock } from '@renderer/types/newMessage'
+import type {
+  AttachmentExtractionFailure,
+  AttachmentExtractionItem,
+  FileMessageBlock,
+  ImageMessageBlock,
+  MessageBlock
+} from '@renderer/types/newMessage'
 import type { OcrResult } from '@renderer/types/ocr'
 import i18n from 'i18next'
 
 const logger = loggerService.withContext('AttachmentTextExtractionService')
 
 /**
- * 注入到用户正文中的附件提取结果上限。
+ * 注入到模型隐藏上下文中的附件提取结果上限。
  *
  * 这里的限制是发送前防线，而不是底层文件读取能力限制：
  * - 单文件最多 20k，避免某一个超长附件吞掉全部上下文；
@@ -22,23 +28,7 @@ export const ATTACHMENT_INJECTION_MAX_TOTAL_CHARS = 60_000
 
 type ExtractionSource = 'ocr' | 'vision_model' | 'document'
 
-export type AttachmentExtractionItem = {
-  fileId: string
-  fileName: string
-  text: string
-  source: ExtractionSource
-  truncated: boolean
-  blockType: 'image' | 'file'
-}
-
-export type AttachmentExtractionFailure = {
-  fileId: string
-  fileName: string
-  error: string
-}
-
 export type AttachmentExtractionResult = {
-  text: string
   results: AttachmentExtractionItem[]
   failed: AttachmentExtractionFailure[]
   hasAnySuccess: boolean
@@ -103,7 +93,7 @@ async function runOcr(file: FileMetadata, imageProvider?: OcrProvider, ocr?: Ext
 
 async function describeImageWithVisionModel(file: FileMetadata, visionModel: Model): Promise<string> {
   // 这里复用现有 AI provider 链路做“一次性视觉理解”，
-  // 目的是在纯文本模型发送前拿到可注入正文的图片描述，
+  // 目的是在纯文本模型发送前拿到可作为隐藏上下文注入的图片描述，
   // 而不是改动正式对话消息的多模态上传协议。
   const base64Image = await window.api.file.base64Image(file.name)
   const provider = getProviderByModel(visionModel)
@@ -202,22 +192,56 @@ async function processImage(
   }
 }
 
-const formatAttachmentSection = (index: number, fileName: string, text: string) =>
-  `[附件 ${index}] ${fileName}\n${text}`
+const formatSourceLabel = (source: AttachmentExtractionItem['source']) => {
+  switch (source) {
+    case 'ocr':
+      return '图片 OCR'
+    case 'vision_model':
+      return '视觉模型'
+    case 'document':
+      return '文档抽取'
+  }
+}
 
-export function buildAttachmentInjectedContent(originalText: string, extractedText: string) {
-  if (!extractedText) {
-    return originalText
+const buildAttachmentContextSection = (index: number, item: AttachmentExtractionItem) => {
+  const truncatedHint = item.truncated ? '\n[该附件结果已截断]' : ''
+  return [
+    `[附件 ${index}] ${item.fileName}`,
+    `来源：${formatSourceLabel(item.source)}`,
+    item.text + truncatedHint
+  ].join('\n')
+}
+
+export function buildAttachmentHiddenContext(
+  results: AttachmentExtractionItem[],
+  failed: AttachmentExtractionFailure[] = []
+) {
+  if (results.length === 0 && failed.length === 0) {
+    return ''
   }
 
-  // 防止重复注入：例如重发消息、上层误传已拼接文本时，不再重复追加同一段附件内容。
-  if (originalText.includes(extractedText)) {
-    return originalText
+  const sections = [
+    '[附件提取隐藏上下文]',
+    '以下内容来自当前用户附件的提取结果，不是用户直接输入的正文。',
+    '图片 OCR 结果可能存在识别误差、顺序错乱、漏字或噪声。',
+    '请仅基于这些提取文本做保守判断，不要声称自己直接看到了图片本身。'
+  ]
+
+  if (results.length > 0) {
+    sections.push('', '【附件提取成功结果】')
+    results.forEach((item, index) => {
+      sections.push(buildAttachmentContextSection(index + 1, item), '')
+    })
   }
 
-  const separator = '\n\n---\n以下是附件提取内容：\n\n'
-  const baseText = originalText.trim()
-  return baseText ? `${baseText}${separator}${extractedText}` : `以下是附件提取内容：\n\n${extractedText}`
+  if (failed.length > 0) {
+    sections.push('【附件提取失败】')
+    failed.forEach((item, index) => {
+      sections.push(`[失败 ${index + 1}] ${item.fileName}\n原因：${item.error}`, '')
+    })
+  }
+
+  return sections.join('\n').trim()
 }
 
 export async function extractAttachmentTexts({
@@ -229,7 +253,6 @@ export async function extractAttachmentTexts({
 }: ExtractAttachmentTextsParams): Promise<AttachmentExtractionResult> {
   if (!files.length) {
     return {
-      text: '',
       results: [],
       failed: [],
       hasAnySuccess: false,
@@ -241,7 +264,6 @@ export async function extractAttachmentTexts({
 
   const results: AttachmentExtractionItem[] = []
   const failed: AttachmentExtractionFailure[] = []
-  const sections: string[] = []
   let totalInjectedChars = 0
   let hasProcessableAttachments = false
   let usedVisionFallbackToOcr = false
@@ -257,7 +279,7 @@ export async function extractAttachmentTexts({
         extractedText = await readFileText(file)
         source = 'document'
       } else if (isImageFile(file) && shouldProcessImageForTextModel(imageProcessMethod)) {
-        // 图片只有在纯文本模型需要“预处理注入正文”时才会走到这里。
+        // 图片只有在纯文本模型需要“预处理提取文本”时才会走到这里。
         // 对视觉模型本身，仍保持既有传图链路，不在这里抢处理权。
         hasProcessableAttachments = true
         const imageResult = await processImage(file, imageProcessMethod, imageProvider, visionModel, ocr)
@@ -277,24 +299,21 @@ export async function extractAttachmentTexts({
       extractedText = truncatedPerFile.text
       truncated = truncatedPerFile.truncated
 
-      const section = formatAttachmentSection(results.length + 1, file.origin_name, extractedText)
       const remaining = ATTACHMENT_INJECTION_MAX_TOTAL_CHARS - totalInjectedChars
       if (remaining <= 0) {
         break
       }
 
-      // 总量截断发生时直接停止后续注入，避免后面的附件结果部分丢失却看起来像完整输出。
-      const totalLimited = truncateText(section, remaining)
+      const totalLimited = truncateText(extractedText, remaining)
       if (!totalLimited.text.trim()) {
         break
       }
 
       totalInjectedChars += totalLimited.text.length
-      sections.push(totalLimited.text)
       results.push({
         fileId: file.id,
         fileName: file.origin_name,
-        text: extractedText,
+        text: totalLimited.text,
         source,
         truncated: truncated || totalLimited.truncated,
         blockType: file.type === FILE_TYPE.IMAGE ? 'image' : 'file'
@@ -316,7 +335,6 @@ export async function extractAttachmentTexts({
   }
 
   return {
-    text: sections.join('\n\n'),
     results,
     failed,
     hasAnySuccess: results.length > 0,

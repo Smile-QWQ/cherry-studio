@@ -982,6 +982,18 @@
     },
     "title": "アシスタント"
   },
+  "attachment": {
+    "extraction": {
+      "fallback_to_ocr": "[to be translated]:Fell back to OCR after vision processing failed",
+      "source": {
+        "document": "[to be translated]:Document extraction",
+        "ocr": "[to be translated]:Image OCR",
+        "vision_model": "[to be translated]:Vision model"
+      },
+      "title": "[to be translated]:Attachment extraction results",
+      "truncated": "[to be translated]:Truncated"
+    }
+  },
   "auth": {
     "error": "APIキーの自動取得に失敗しました。手動で取得してください",
     "get_key": "取得",
@@ -2876,7 +2888,8 @@
   },
   "ocr": {
     "builtin": {
-      "system": "システム OCR"
+      "system": "システム OCR",
+      "wechat_ocr": "[to be translated]:WeChat OCR (Recommended)"
     },
     "error": {
       "provider": {
@@ -2896,6 +2909,18 @@
       "provider": {
         "fallback": "{{name}} に戻されました。これにより問題が発生する可能性があります。"
       }
+    },
+    "wechat": {
+      "available": "[to be translated]:Detected and available",
+      "bridge_path": "[to be translated]:Bridge DLL path",
+      "detecting": "[to be translated]:Detecting",
+      "install_path": "[to be translated]:WeChat install path",
+      "installed_but_unavailable": "[to be translated]:Installed, but OCR component is unavailable",
+      "not_installed": "[to be translated]:WeChat OCR not detected",
+      "ocr_path": "[to be translated]:OCR component path",
+      "reason": "[to be translated]:Unavailable reason",
+      "refresh": "[to be translated]:Re-detect",
+      "status": "[to be translated]:Detection status"
     }
   },
   "ollama": {
@@ -6041,6 +6066,12 @@
   },
   "warning": {
     "missing_provider": "サプライヤーが存在しないため、デフォルトのサプライヤー {{provider}} にロールバックされました。これにより問題が発生する可能性があります。"
+  },
+  "wechat_ocr": {
+    "bridge_missing": "[to be translated]:WeChat OCR bridge DLL not found",
+    "component_missing": "[to be translated]:WeChat OCR component or runtime directory is missing",
+    "not_detected": "[to be translated]:WeChat installation or OCR component was not detected",
+    "only_supported_on_windows": "[to be translated]:WeChat OCR is only supported on Windows"
   },
   "words": {
     "knowledgeGraph": "ナレッジグラフ",

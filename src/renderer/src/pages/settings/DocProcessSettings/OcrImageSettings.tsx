@@ -20,7 +20,8 @@ type Props = {
 
 const OcrImageSettings = ({ setProvider }: Props) => {
   const { t } = useTranslation()
-  const { providers, imageProvider, getOcrProviderName, setImageProviderId } = useOcrProviders()
+  const { providers, imageProvider, getOcrProviderName, setImageProviderId, recommendedImageProviderId } =
+    useOcrProviders()
   const fetcher = useCallback(() => {
     return window.api.ocr.listProviders()
   }, [])
@@ -57,9 +58,12 @@ const OcrImageSettings = ({ setProvider }: Props) => {
       .filter(validFilter)
       .map((p) => ({
         value: p.id,
-        label: getOcrProviderName(p)
+        label:
+          p.id === recommendedImageProviderId
+            ? `${getOcrProviderName(p)} (${t('common.recommended', '推荐')})`
+            : getOcrProviderName(p)
       }))
-  }, [getOcrProviderName, imageProviders, platformSupport, validProviders])
+  }, [getOcrProviderName, imageProviders, platformSupport, recommendedImageProviderId, t, validProviders])
 
   const isSystem = imageProvider.id === BuiltinOcrProviderIds.system
 

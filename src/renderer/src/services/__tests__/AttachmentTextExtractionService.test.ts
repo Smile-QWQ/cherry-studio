@@ -27,7 +27,7 @@ vi.mock('@renderer/aiCore/AiProvider', () => ({
 import {
   ATTACHMENT_INJECTION_MAX_FILE_CHARS,
   ATTACHMENT_INJECTION_MAX_TOTAL_CHARS,
-  buildAttachmentInjectedContent,
+  buildAttachmentHiddenContext,
   extractAttachmentTexts,
   hasVisualExtractionResult
 } from '../AttachmentTextExtractionService'
@@ -104,7 +104,6 @@ describe('AttachmentTextExtractionService', () => {
     })
 
     expect(result).toEqual({
-      text: '',
       hasAnySuccess: false,
       hasProcessableAttachments: false,
       results: [],
@@ -131,8 +130,7 @@ describe('AttachmentTextExtractionService', () => {
     })
 
     expect(result.hasAnySuccess).toBe(true)
-    expect(result.text).toContain('[附件 1] manual.pdf')
-    expect(result.text).toContain('Document content')
+    expect(result.results[0]?.text).toContain('Document content')
     expect(result.failed).toEqual([])
     expect(result.results[0]?.blockType).toBe('file')
   })
@@ -149,7 +147,7 @@ describe('AttachmentTextExtractionService', () => {
     })
 
     expect(ocr).toHaveBeenCalledWith(file, imageProvider)
-    expect(result.text).toContain('ocr result')
+    expect(result.results[0]?.text).toContain('ocr result')
     expect(result.results[0]?.source).toBe('ocr')
     expect(result.results[0]?.blockType).toBe('image')
   })
@@ -170,7 +168,7 @@ describe('AttachmentTextExtractionService', () => {
     })
 
     expect(completionsMock).toHaveBeenCalled()
-    expect(result.text).toContain('vision result')
+    expect(result.results[0]?.text).toContain('vision result')
     expect(result.results[0]?.source).toBe('vision_model')
     expect(result.results[0]?.blockType).toBe('image')
   })
@@ -204,7 +202,7 @@ describe('AttachmentTextExtractionService', () => {
 
     expect(ocr).not.toHaveBeenCalled()
     expect(result.hasProcessableAttachments).toBe(false)
-    expect(result.text).toBe('')
+    expect(result.results).toEqual([])
   })
 
   it('continues when one attachment fails and keeps successful ones', async () => {
@@ -233,7 +231,7 @@ describe('AttachmentTextExtractionService', () => {
 
     expect(result.hasAnySuccess).toBe(true)
     expect(result.failed).toHaveLength(1)
-    expect(result.text).toContain('second file text')
+    expect(result.results[0]?.text).toContain('second file text')
   })
 
   it('truncates each file to 20k characters', async () => {
@@ -281,20 +279,29 @@ describe('AttachmentTextExtractionService', () => {
     })
 
     expect(result.totalInjectedChars).toBeLessThanOrEqual(ATTACHMENT_INJECTION_MAX_TOTAL_CHARS)
-    expect(result.text.length).toBeLessThanOrEqual(ATTACHMENT_INJECTION_MAX_TOTAL_CHARS + 1024)
+    expect(result.results.map((item) => item.text).join('\n').length).toBeLessThanOrEqual(
+      ATTACHMENT_INJECTION_MAX_TOTAL_CHARS + 1024
+    )
   })
 
-  it('builds merged content with clear delimiter', () => {
-    const merged = buildAttachmentInjectedContent('hello', '[附件 1] a.png\ntext')
-    expect(merged).toContain('hello')
-    expect(merged).toContain('以下是附件提取内容')
-    expect(merged).toContain('[附件 1] a.png')
-  })
+  it('builds hidden attachment context instead of mutating visible user text', () => {
+    const hidden = buildAttachmentHiddenContext(
+      [
+        {
+          fileId: 'image-1',
+          fileName: 'a.png',
+          text: 'ocr text',
+          source: 'ocr',
+          truncated: false,
+          blockType: 'image'
+        }
+      ],
+      []
+    )
 
-  it('does not duplicate injected content when original text already contains the same section', () => {
-    const extracted = '[附件 1] a.png\ntext'
-    const original = `hello\n\n---\n以下是附件提取内容：\n\n${extracted}`
-    expect(buildAttachmentInjectedContent(original, extracted)).toBe(original)
+    expect(hidden).toContain('附件提取隐藏上下文')
+    expect(hidden).toContain('a.png')
+    expect(hidden).toContain('ocr text')
   })
 
   it('detects whether visual extraction results exist', async () => {

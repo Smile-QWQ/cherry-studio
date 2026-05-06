@@ -982,6 +982,18 @@
     },
     "title": "Assistants"
   },
+  "attachment": {
+    "extraction": {
+      "fallback_to_ocr": "Fell back to OCR after vision processing failed",
+      "source": {
+        "document": "Document extraction",
+        "ocr": "Image OCR",
+        "vision_model": "Vision model"
+      },
+      "title": "Attachment extraction results",
+      "truncated": "Truncated"
+    }
+  },
   "auth": {
     "error": "API key automatically obtained failed, please get it manually",
     "get_key": "Get",
@@ -2876,7 +2888,8 @@
   },
   "ocr": {
     "builtin": {
-      "system": "System OCR"
+      "system": "System OCR",
+      "wechat_ocr": "WeChat OCR (Recommended)"
     },
     "error": {
       "provider": {
@@ -2896,6 +2909,18 @@
       "provider": {
         "fallback": "Reverted to {{name}}, which may cause issues"
       }
+    },
+    "wechat": {
+      "available": "Detected and available",
+      "bridge_path": "Bridge DLL path",
+      "detecting": "Detecting",
+      "install_path": "WeChat install path",
+      "installed_but_unavailable": "Installed, but OCR component is unavailable",
+      "not_installed": "WeChat OCR not detected",
+      "ocr_path": "OCR component path",
+      "reason": "Unavailable reason",
+      "refresh": "Re-detect",
+      "status": "Detection status"
     }
   },
   "ollama": {
@@ -6041,6 +6066,12 @@
   },
   "warning": {
     "missing_provider": "The supplier does not exist; reverted to the default supplier {{provider}}. This may cause issues."
+  },
+  "wechat_ocr": {
+    "bridge_missing": "WeChat OCR bridge DLL not found",
+    "component_missing": "WeChat OCR component or runtime directory is missing",
+    "not_detected": "WeChat installation or OCR component was not detected",
+    "only_supported_on_windows": "WeChat OCR is only supported on Windows"
   },
   "words": {
     "knowledgeGraph": "Knowledge Graph",

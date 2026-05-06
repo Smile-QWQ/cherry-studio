@@ -135,6 +135,7 @@ const PopupContainer: React.FC<Props> = ({ source, title, resolve }) => {
           citations: 0,
           translations: 0,
           errors: 0,
+          attachment_extraction: 0,
           ...(isTopicMode && { messages: 0 })
         })
       } finally {

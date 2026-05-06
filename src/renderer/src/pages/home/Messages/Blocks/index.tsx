@@ -10,6 +10,7 @@ import React, { useMemo } from 'react'
 import { useSelector } from 'react-redux'
 import styled from 'styled-components'
 
+import AttachmentExtractionBlock from './AttachmentExtractionBlock'
 import BlockErrorFallback from './BlockErrorFallback'
 import CitationBlock from './CitationBlock'
 import CompactBlock from './CompactBlock'
@@ -216,6 +217,9 @@ const MessageBlockRenderer: React.FC<Props> = ({ blocks, message }) => {
             break
           case MessageBlockType.FILE:
             blockComponent = <FileBlock key={block.id} block={block} />
+            break
+          case MessageBlockType.ATTACHMENT_EXTRACTION:
+            blockComponent = <AttachmentExtractionBlock key={block.id} block={block} />
             break
           case MessageBlockType.TOOL:
             blockComponent = <ToolBlock key={block.id} block={block} />

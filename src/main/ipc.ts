@@ -64,6 +64,7 @@ import NotificationService from './services/NotificationService'
 import * as NutstoreService from './services/NutstoreService'
 import ObsidianVaultService from './services/ObsidianVaultService'
 import { ocrService } from './services/ocr/OcrService'
+import { weChatOcrDetectionService } from './services/ocr/WeChatOcrDetectionService'
 import { openClawService } from './services/OpenClawService'
 import { isOvmsSupported } from './services/OvmsManager'
 import powerMonitorService from './services/PowerMonitorService'
@@ -1013,6 +1014,8 @@ export async function registerIpc(mainWindow: BrowserWindow, app: Electron.App) 
     ocrService.ocr(file, provider)
   )
   ipcMain.handle(IpcChannel.OCR_ListProviders, () => ocrService.listProviderIds())
+  ipcMain.handle(IpcChannel.OCR_DetectWeChat, () => weChatOcrDetectionService.detect())
+  ipcMain.handle(IpcChannel.OCR_RefreshWeChatDetection, () => weChatOcrDetectionService.detect())
 
   // OVMS
   ipcMain.handle(IpcChannel.Ovms_IsSupported, () => isOvmsSupported)

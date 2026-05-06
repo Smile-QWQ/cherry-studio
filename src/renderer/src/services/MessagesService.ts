@@ -9,12 +9,18 @@ import { messageBlocksSelectors, removeManyBlocks } from '@renderer/store/messag
 import { selectMessagesForTopic } from '@renderer/store/newMessage'
 import type { Assistant, FileMetadata, Model, Topic, Usage } from '@renderer/types'
 import { FILE_TYPE } from '@renderer/types'
-import type { Message, MessageBlock } from '@renderer/types/newMessage'
+import type {
+  AttachmentExtractionFailure,
+  AttachmentExtractionItem,
+  Message,
+  MessageBlock
+} from '@renderer/types/newMessage'
 import { AssistantMessageStatus, MessageBlockStatus, MessageBlockType } from '@renderer/types/newMessage'
 import { uuid } from '@renderer/utils'
 import { getTitleFromString } from '@renderer/utils/export'
 import {
   createAssistantMessage,
+  createAttachmentExtractionBlock,
   createFileBlock,
   createImageBlock,
   createMainTextBlock,
@@ -120,6 +126,7 @@ export function getUserMessage({
   type,
   content,
   files,
+  attachmentExtraction,
   // Keep other potential params if needed by createMessage
   mentions,
   usage
@@ -129,6 +136,12 @@ export function getUserMessage({
   type?: Message['type']
   content?: string
   files?: FileMetadata[]
+  attachmentExtraction?: {
+    items: AttachmentExtractionItem[]
+    failed: AttachmentExtractionFailure[]
+    totalInjectedChars: number
+    usedVisionFallbackToOcr: boolean
+  }
   knowledgeBaseIds?: string[]
   mentions?: Model[]
   usage?: Usage
@@ -160,6 +173,22 @@ export function getUserMessage({
         blockIds.push(fileBlock.id)
       }
     })
+  }
+  if (attachmentExtraction && (attachmentExtraction.items.length > 0 || attachmentExtraction.failed.length > 0)) {
+    const defaultSelectedFileId =
+      attachmentExtraction.items[0]?.fileId ?? attachmentExtraction.failed[0]?.fileId ?? undefined
+    const extractionBlock = createAttachmentExtractionBlock(
+      messageId,
+      {
+        ...attachmentExtraction,
+        defaultSelectedFileId
+      },
+      {
+        status: MessageBlockStatus.SUCCESS
+      }
+    )
+    blocks.push(extractionBlock)
+    blockIds.push(extractionBlock.id)
   }
 
   // 直接在createMessage中传入id

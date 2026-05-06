@@ -5,7 +5,7 @@
  */
 
 import { loggerService } from '@logger'
-import type { AgentType, BuiltinMCPServerName, BuiltinOcrProviderId } from '@renderer/types'
+import type { AgentType, AttachmentExtractionSource, BuiltinMCPServerName, BuiltinOcrProviderId } from '@renderer/types'
 import { BuiltinMCPServerNames } from '@renderer/types'
 
 import i18n from './index'
@@ -369,15 +369,27 @@ export const getBuiltInMcpServerDescriptionLabel = (key: string): string => {
 const builtinOcrProviderKeyMap = {
   system: 'ocr.builtin.system',
   tesseract: '',
+  wechat_ocr: 'ocr.builtin.wechat_ocr',
   paddleocr: '',
   ovocr: ''
 } as const satisfies Record<BuiltinOcrProviderId, string>
 
 export const getBuiltinOcrProviderLabel = (key: BuiltinOcrProviderId) => {
   if (key === 'tesseract') return 'Tesseract'
+  else if (key === 'wechat_ocr') return getLabel(builtinOcrProviderKeyMap, key)
   else if (key == 'paddleocr') return 'PaddleOCR'
   else if (key == 'ovocr') return 'Intel OV(NPU) OCR'
   else return getLabel(builtinOcrProviderKeyMap, key)
+}
+
+const attachmentExtractionSourceKeyMap: Record<AttachmentExtractionSource, string> = {
+  ocr: 'attachment.extraction.source.ocr',
+  vision_model: 'attachment.extraction.source.vision_model',
+  document: 'attachment.extraction.source.document'
+}
+
+export const getAttachmentExtractionSourceLabel = (key: AttachmentExtractionSource) => {
+  return getLabel(attachmentExtractionSourceKeyMap, key)
 }
 
 // oxlint-disable-next-line no-unused-vars -- placeholder for future agent type labels

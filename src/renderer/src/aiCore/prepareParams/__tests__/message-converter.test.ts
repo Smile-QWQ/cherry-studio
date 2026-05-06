@@ -3,6 +3,7 @@ import type { FileMetadata } from '@renderer/types/file'
 import { FILE_TYPE } from '@renderer/types/file'
 import {
   AssistantMessageStatus,
+  type AttachmentExtractionMessageBlock,
   type FileMessageBlock,
   type ImageMessageBlock,
   type MainTextMessageBlock,
@@ -35,6 +36,7 @@ type MockableMessage = Message & {
   __mockContent?: string
   __mockFileBlocks?: FileMessageBlock[]
   __mockImageBlocks?: ImageMessageBlock[]
+  __mockAttachmentExtractionBlocks?: AttachmentExtractionMessageBlock[]
   __mockThinkingBlocks?: ThinkingMessageBlock[]
   __mockMainTextBlocks?: MainTextMessageBlock[]
 }
@@ -43,6 +45,8 @@ vi.mock('@renderer/utils/messageUtils/find', () => ({
   getMainTextContent: (message: Message) => (message as MockableMessage).__mockContent ?? '',
   findFileBlocks: (message: Message) => (message as MockableMessage).__mockFileBlocks ?? [],
   findImageBlocks: (message: Message) => (message as MockableMessage).__mockImageBlocks ?? [],
+  findAttachmentExtractionBlocks: (message: Message) =>
+    (message as MockableMessage).__mockAttachmentExtractionBlocks ?? [],
   findThinkingBlocks: (message: Message) => (message as MockableMessage).__mockThinkingBlocks ?? [],
   findMainTextBlocks: (message: Message) => (message as MockableMessage).__mockMainTextBlocks ?? []
 }))
@@ -136,6 +140,23 @@ const createMainTextBlock = (
   createdAt: overrides.createdAt ?? new Date(2024, 0, 1, 0, 0, blockCounter).toISOString(),
   status: overrides.status ?? MessageBlockStatus.SUCCESS,
   content: overrides.content ?? '',
+  ...overrides
+})
+
+const createAttachmentExtractionBlock = (
+  messageId: string,
+  overrides: Partial<Omit<AttachmentExtractionMessageBlock, 'type' | 'messageId'>> = {}
+): AttachmentExtractionMessageBlock => ({
+  id: overrides.id ?? `attachment-extraction-block-${++blockCounter}`,
+  messageId,
+  type: MessageBlockType.ATTACHMENT_EXTRACTION,
+  createdAt: overrides.createdAt ?? new Date(2024, 0, 1, 0, 0, blockCounter).toISOString(),
+  status: overrides.status ?? MessageBlockStatus.SUCCESS,
+  items: overrides.items ?? [],
+  failed: overrides.failed ?? [],
+  totalInjectedChars: overrides.totalInjectedChars ?? 0,
+  usedVisionFallbackToOcr: overrides.usedVisionFallbackToOcr ?? false,
+  defaultSelectedFileId: overrides.defaultSelectedFileId,
   ...overrides
 })
 
@@ -258,6 +279,42 @@ describe('messageConverter', () => {
           content: [{ type: 'text', text: 'Summarize the PDF' }]
         }
       ])
+    })
+
+    it('appends hidden attachment extraction text for non-vision user messages', async () => {
+      const model = createModel({ id: 'gpt-4.1-mini', name: 'GPT-4.1 mini' })
+      const message = createMessage('user')
+      message.__mockContent = '现在呢'
+      message.__mockAttachmentExtractionBlocks = [
+        createAttachmentExtractionBlock(message.id, {
+          items: [
+            {
+              fileId: 'image-1',
+              fileName: 'screen.png',
+              source: 'ocr',
+              text: '首页 顶部 智能体',
+              truncated: false,
+              blockType: 'image'
+            }
+          ],
+          failed: []
+        })
+      ]
+
+      const result = await convertMessageToSdkParam(message, false, model)
+
+      expect(result).toEqual({
+        role: 'user',
+        content: [
+          { type: 'text', text: '现在呢' },
+          expect.objectContaining({
+            type: 'text',
+            text: expect.stringContaining('附件提取隐藏上下文')
+          })
+        ]
+      })
+      expect((result as any).content[1].text).toContain('screen.png')
+      expect((result as any).content[1].text).toContain('首页 顶部 智能体')
     })
 
     it('includes reasoning parts for assistant messages with thinking blocks', async () => {

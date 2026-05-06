@@ -2,6 +2,7 @@ import store from '@renderer/store'
 import { formatCitationsFromBlock, messageBlocksSelectors } from '@renderer/store/messageBlock'
 import type { FileMetadata } from '@renderer/types'
 import type {
+  AttachmentExtractionMessageBlock,
   CitationMessageBlock,
   FileMessageBlock,
   ImageMessageBlock,
@@ -106,6 +107,21 @@ export const findFileBlocks = (message: Message): FileMessageBlock[] => {
     }
   }
   return fileBlocks
+}
+
+export const findAttachmentExtractionBlocks = (message: Message): AttachmentExtractionMessageBlock[] => {
+  if (!message || !message.blocks || message.blocks.length === 0) {
+    return []
+  }
+  const state = store.getState()
+  const extractionBlocks: AttachmentExtractionMessageBlock[] = []
+  for (const blockId of message.blocks) {
+    const block = messageBlocksSelectors.selectById(state, blockId)
+    if (block && block.type === MessageBlockType.ATTACHMENT_EXTRACTION) {
+      extractionBlocks.push(block as AttachmentExtractionMessageBlock)
+    }
+  }
+  return extractionBlocks
 }
 
 /**
