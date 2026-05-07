@@ -65,48 +65,6 @@ export interface LlmState {
   settings: LlmSettings
 }
 
-const getForkInitialProviders = () => moveProvider([...SYSTEM_PROVIDERS], 'deepseek', 1)
-
-export const initialState: LlmState = {
-  defaultModel: DEFAULT_MODELS.assistant,
-  topicNamingModel: DEFAULT_MODELS.quick,
-  quickModel: DEFAULT_MODELS.quick,
-  translateModel: DEFAULT_MODELS.translate,
-  visionModel: DEFAULT_MODELS.vision,
-  quickAssistantId: '',
-  providers: getForkInitialProviders(),
-  settings: {
-    ollama: {
-      keepAliveTime: 0
-    },
-    lmstudio: {
-      keepAliveTime: 0
-    },
-    gpustack: {
-      keepAliveTime: 0
-    },
-    vertexai: {
-      serviceAccount: {
-        privateKey: '',
-        clientEmail: ''
-      },
-      projectId: '',
-      location: ''
-    },
-    awsBedrock: {
-      authType: 'iam',
-      accessKeyId: '',
-      secretAccessKey: '',
-      apiKey: '',
-      region: ''
-    },
-    cherryIn: {
-      accessToken: '',
-      refreshToken: ''
-    }
-  }
-}
-
 // 由于 isLocalAi 目前总是为false，该函数暂未被使用
 // 需要投入使用时，应当保证返回值类型满足 LlmState 要求，而不是使用类型断言
 const getIntegratedInitialState = () => {
@@ -150,6 +108,48 @@ export const moveProvider = (providers: Provider[], id: string, position: number
   newProviders.splice(index, 1)
   newProviders.splice(position - 1, 0, provider)
   return newProviders
+}
+
+const getForkInitialProviders = () => moveProvider([...SYSTEM_PROVIDERS], 'deepseek', 1)
+
+export const initialState: LlmState = {
+  defaultModel: DEFAULT_MODELS.assistant,
+  topicNamingModel: DEFAULT_MODELS.quick,
+  quickModel: DEFAULT_MODELS.quick,
+  translateModel: DEFAULT_MODELS.translate,
+  visionModel: DEFAULT_MODELS.vision,
+  quickAssistantId: '',
+  providers: getForkInitialProviders(),
+  settings: {
+    ollama: {
+      keepAliveTime: 0
+    },
+    lmstudio: {
+      keepAliveTime: 0
+    },
+    gpustack: {
+      keepAliveTime: 0
+    },
+    vertexai: {
+      serviceAccount: {
+        privateKey: '',
+        clientEmail: ''
+      },
+      projectId: '',
+      location: ''
+    },
+    awsBedrock: {
+      authType: 'iam',
+      accessKeyId: '',
+      secretAccessKey: '',
+      apiKey: '',
+      region: ''
+    },
+    cherryIn: {
+      accessToken: '',
+      refreshToken: ''
+    }
+  }
 }
 
 const llmSlice = createSlice({
