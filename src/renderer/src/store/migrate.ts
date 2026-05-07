@@ -3421,6 +3421,7 @@ const migrateConfig = {
   },
   '207': (state: RootState) => {
     try {
+      addOcrProvider(state, BUILTIN_OCR_PROVIDERS_MAP.wechat_ocr)
       state.settings.imageProcessMethod ||= 'ocr'
       state.llm.visionModel ||= DEFAULT_MODELS.vision
       logger.info('migrate 207 success')
