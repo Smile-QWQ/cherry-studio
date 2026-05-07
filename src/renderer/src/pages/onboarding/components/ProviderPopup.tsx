@@ -3,12 +3,18 @@ import i18n from '@renderer/i18n'
 import ProviderList from '@renderer/pages/settings/ProviderSettings/ProviderList'
 import { MemoryRouter } from 'react-router-dom'
 
+interface ProviderPopupOptions {
+  providerId?: string
+}
+
 export default class ProviderPopup {
-  static show() {
+  static show(options: ProviderPopupOptions = {}) {
+    const initialEntries = options.providerId ? [`/settings/provider?id=${options.providerId}`] : ['/settings/provider']
+
     return GeneralPopup.show({
       title: i18n.t('onboarding.welcome.select_other_provider'),
       content: (
-        <MemoryRouter>
+        <MemoryRouter initialEntries={initialEntries}>
           <ProviderList isOnboarding />
         </MemoryRouter>
       ),

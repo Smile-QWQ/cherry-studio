@@ -2944,13 +2944,11 @@
       "connected": "Successfully connected to CherryIN"
     },
     "welcome": {
-      "login_cherryin": "Login with CherryIN",
-      "or_continue_with": "OR CONTINUE WITH",
-      "other_provider": "Choose Other Providers",
+      "configure_provider": "Configure DeepSeek",
       "select_other_provider": "Select Other Provider",
-      "setup_hint": "Please configure at least one provider for the best experience",
-      "subtitle": "Enjoy top-tier AI services with CherryIN",
-      "title": "Welcome to Cherry Studio"
+      "setup_hint": "Please configure at least one provider. Start with {{provider}} to get going.",
+      "subtitle": "Configure your own model provider and start using Cherry Studio Fork",
+      "title": "Welcome to Cherry Studio Fork"
     }
   },
   "openclaw": {

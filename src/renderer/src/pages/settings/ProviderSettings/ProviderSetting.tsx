@@ -476,8 +476,8 @@ const ProviderSetting: FC<Props> = ({ providerId, isOnboarding = false }) => {
         />
       </SettingTitle>
       <Divider style={{ width: '100%', margin: '10px 0' }} />
-      {isProviderSupportAuth(provider) && <ProviderOAuth providerId={provider.id} />}
-      {isCherryIN && <CherryINOAuth providerId={provider.id} />}
+      {isProviderSupportAuth(provider) && !isOnboarding && <ProviderOAuth providerId={provider.id} />}
+      {isCherryIN && !isOnboarding && <CherryINOAuth providerId={provider.id} />}
       {provider.id === 'openai' && <OpenAIAlert />}
       {provider.id === 'ovms' && <OVMSSettings />}
       {isDmxapi && <DMXAPISettings providerId={provider.id} />}
@@ -578,7 +578,7 @@ const ProviderSetting: FC<Props> = ({ providerId, isOnboarding = false }) => {
               </SettingSubtitle>
               {activeHostField === 'apiHost' && (
                 <>
-                  {isCherryIN && isChineseUser ? (
+                  {isCherryIN && isChineseUser && !isOnboarding ? (
                     <CherryINSettings providerId={provider.id} apiHost={apiHost} setApiHost={setApiHost} />
                   ) : (
                     <Space.Compact style={{ width: '100%', marginTop: 5 }}>

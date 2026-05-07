@@ -88,7 +88,7 @@ export const SYSTEM_PROVIDERS_CONFIG: Record<SystemProviderId, SystemProvider> =
     anthropicApiHost: 'https://open.cherryin.cc',
     models: [],
     isSystem: true,
-    enabled: true
+    enabled: false
   },
   silicon: {
     id: 'silicon',

@@ -14,7 +14,6 @@ interface OnboardingPageProps {
 
 const OnboardingPage: FC<OnboardingPageProps> = ({ onComplete }) => {
   const [step, setStep] = useState<OnboardingStep>('welcome')
-  const [cherryInLoggedIn, setCherryInLoggedIn] = useState(false)
 
   return (
     <div className="flex h-screen w-screen flex-col">
@@ -24,10 +23,8 @@ const OnboardingPage: FC<OnboardingPageProps> = ({ onComplete }) => {
       <div className="flex flex-1 px-2 pb-2">
         <div className="relative flex flex-1 overflow-hidden rounded-xl bg-(--color-background)">
           <SkipButton onSkip={onComplete} />
-          {step === 'welcome' && <WelcomePage setStep={setStep} setCherryInLoggedIn={setCherryInLoggedIn} />}
-          {step === 'select-model' && (
-            <SelectModelPage cherryInLoggedIn={cherryInLoggedIn} setStep={setStep} onComplete={onComplete} />
-          )}
+          {step === 'welcome' && <WelcomePage setStep={setStep} />}
+          {step === 'select-model' && <SelectModelPage setStep={setStep} onComplete={onComplete} />}
         </div>
       </div>
     </div>

@@ -314,6 +314,10 @@ const ProviderList: FC<ProviderListProps> = ({ isOnboarding = false }) => {
       return false
     }
 
+    if (isOnboarding && provider.id === 'cherryin') {
+      return false
+    }
+
     // Filter by agent support
     if (agentFilterEnabled && !isAnthropicSupportedProvider(provider)) {
       return false

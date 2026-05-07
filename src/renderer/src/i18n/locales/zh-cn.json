@@ -2944,13 +2944,11 @@
       "connected": "成功连接 CherryIN"
     },
     "welcome": {
-      "login_cherryin": "登录 CherryIN",
-      "or_continue_with": "或使用其他方式",
-      "other_provider": "选择其他服务商",
+      "configure_provider": "配置 DeepSeek",
       "select_other_provider": "选择其他服务商",
-      "setup_hint": "请您先至少配置一个服务商，以获得最佳使用体验",
-      "subtitle": "使用 CherryIN 服务商可畅享顶级 AI 服务",
-      "title": "欢迎使用 Cherry Studio"
+      "setup_hint": "请先配置至少一个服务商，建议先配置 {{provider}} 以开始使用",
+      "subtitle": "配置你自己的模型服务商，开始使用 Cherry Studio Fork",
+      "title": "欢迎使用 Cherry Studio Fork"
     }
   },
   "openclaw": {

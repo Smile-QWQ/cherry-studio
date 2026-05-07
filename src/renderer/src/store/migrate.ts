@@ -3463,12 +3463,38 @@ const migrateConfig = {
       }
 
       state.settings.imageProcessMethod ||= 'ocr'
-      state.settings.defaultPaintingProvider ||= 'zhipu'
+      state.settings.defaultPaintingProvider ||= 'cherryin'
       state.llm.visionModel ||= DEFAULT_MODELS.vision
       logger.info('migrate 207 success')
       return state
     } catch (error) {
       logger.error('migrate 207 error', error as Error)
+      return state
+    }
+  },
+  '208': (state: RootState) => {
+    try {
+      const cherryinProvider = state.llm.providers.find((provider) => provider.id === 'cherryin')
+      const hasCherryInCredentials = !!(
+        cherryinProvider?.apiKey?.trim() ||
+        state.llm.settings?.cherryIn?.accessToken?.trim() ||
+        state.llm.settings?.cherryIn?.refreshToken?.trim()
+      )
+
+      if (cherryinProvider && !hasCherryInCredentials) {
+        cherryinProvider.enabled = false
+      }
+
+      const deepseekProvider = state.llm.providers.find((provider) => provider.id === 'deepseek')
+      if (deepseekProvider) {
+        deepseekProvider.enabled = true
+        state.llm.providers = moveProvider(state.llm.providers, 'deepseek', 1)
+      }
+
+      logger.info('migrate 208 success')
+      return state
+    } catch (error) {
+      logger.error('migrate 208 error', error as Error)
       return state
     }
   }

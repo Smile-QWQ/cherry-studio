@@ -65,6 +65,8 @@ export interface LlmState {
   settings: LlmSettings
 }
 
+const getForkInitialProviders = () => moveProvider([...SYSTEM_PROVIDERS], 'deepseek', 1)
+
 export const initialState: LlmState = {
   defaultModel: DEFAULT_MODELS.assistant,
   topicNamingModel: DEFAULT_MODELS.quick,
@@ -72,7 +74,7 @@ export const initialState: LlmState = {
   translateModel: DEFAULT_MODELS.translate,
   visionModel: DEFAULT_MODELS.vision,
   quickAssistantId: '',
-  providers: SYSTEM_PROVIDERS,
+  providers: getForkInitialProviders(),
   settings: {
     ollama: {
       keepAliveTime: 0
