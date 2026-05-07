@@ -14,7 +14,7 @@ export function processReqMessages(
 }
 
 function needStrictlyInterleaveUserAndAssistantMessages(model: Model) {
-  return model.id === 'deepseek-reasoner'
+  return model.id === 'deepseek-reasoner' || model.id === 'deepseek-v4-pro'
 }
 
 function interleaveUserAndAssistantMessages(messages: ChatCompletionMessageParam[]): ChatCompletionMessageParam[] {

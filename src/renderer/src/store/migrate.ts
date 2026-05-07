@@ -3497,6 +3497,58 @@ const migrateConfig = {
       logger.error('migrate 208 error', error as Error)
       return state
     }
+  },
+  '209': (state: RootState) => {
+    try {
+      state.llm.providers = state.llm.providers.filter((provider) => provider.id !== 'cherryai')
+
+      const deepseekProvider = state.llm.providers.find((provider) => provider.id === 'deepseek')
+      if (deepseekProvider) {
+        deepseekProvider.models = SYSTEM_MODELS.deepseek
+        deepseekProvider.enabled = true
+        state.llm.providers = moveProvider(state.llm.providers, 'deepseek', 1)
+      }
+
+      const legacyModelMap: Record<string, Model> = {
+        'deepseek:deepseek-chat': {
+          id: 'deepseek-v4-flash',
+          name: 'DeepSeek V4 Flash',
+          provider: 'deepseek',
+          group: 'DeepSeek V4'
+        },
+        'deepseek:deepseek-reasoner': {
+          id: 'deepseek-v4-pro',
+          name: 'DeepSeek V4 Pro',
+          provider: 'deepseek',
+          group: 'DeepSeek V4'
+        }
+      }
+
+      const remapLegacyDeepSeekModel = (model?: Model | null) => {
+        if (!model) return model
+        return legacyModelMap[`${model.provider}:${model.id}`] || model
+      }
+
+      state.llm.defaultModel = remapLegacyDeepSeekModel(state.llm.defaultModel) || state.llm.defaultModel
+      state.llm.quickModel = remapLegacyDeepSeekModel(state.llm.quickModel) || state.llm.quickModel
+      state.llm.translateModel = remapLegacyDeepSeekModel(state.llm.translateModel) || state.llm.translateModel
+      state.llm.visionModel = remapLegacyDeepSeekModel(state.llm.visionModel) || state.llm.visionModel
+
+      state.assistants.assistants.forEach((assistant) => {
+        if (assistant.model) {
+          assistant.model = remapLegacyDeepSeekModel(assistant.model) || assistant.model
+        }
+        if (assistant.defaultModel) {
+          assistant.defaultModel = remapLegacyDeepSeekModel(assistant.defaultModel) || assistant.defaultModel
+        }
+      })
+
+      logger.info('migrate 209 success')
+      return state
+    } catch (error) {
+      logger.error('migrate 209 error', error as Error)
+      return state
+    }
   }
 }
 

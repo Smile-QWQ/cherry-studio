@@ -207,12 +207,12 @@ const AboutSettings: FC = () => {
             <VersionWrapper>
               <Title>{APP_NAME}</Title>
               <Description>{t('settings.about.description')}</Description>
-              <Tag
-                onClick={() => onOpenWebsite(APP_RELEASES_URL)}
-                color="cyan"
-                style={{ marginTop: 8, cursor: 'pointer' }}>
-                v{version}
-              </Tag>
+              <VersionTags>
+                <Tag onClick={() => onOpenWebsite(APP_RELEASES_URL)} color="cyan" style={{ cursor: 'pointer' }}>
+                  v{version}
+                </Tag>
+                <Tag color="magenta">SmileQWQ</Tag>
+              </VersionTags>
             </VersionWrapper>
           </Row>
           {!isPortable && (
@@ -365,6 +365,13 @@ const VersionWrapper = styled.div`
   min-height: 80px;
   justify-content: center;
   align-items: flex-start;
+`
+
+const VersionTags = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
 `
 
 const Title = styled.div`

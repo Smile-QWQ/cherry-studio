@@ -8,10 +8,10 @@ export const qwenModel: Model = {
 }
 
 export const forkDefaultModel: Model = {
-  id: 'deepseek-chat',
-  name: 'DeepSeek Chat',
+  id: 'deepseek-v4-flash',
+  name: 'DeepSeek V4 Flash',
   provider: 'deepseek',
-  group: 'DeepSeek'
+  group: 'DeepSeek V4'
 }
 
 export const DEFAULT_MODELS = {
@@ -426,16 +426,16 @@ export const SYSTEM_MODELS: Record<SystemProviderId | 'defaultModel', Model[]> =
   ],
   deepseek: [
     {
-      id: 'deepseek-chat',
+      id: 'deepseek-v4-flash',
       provider: 'deepseek',
-      name: 'DeepSeek Chat',
-      group: 'DeepSeek Chat'
+      name: 'DeepSeek V4 Flash',
+      group: 'DeepSeek V4'
     },
     {
-      id: 'deepseek-reasoner',
+      id: 'deepseek-v4-pro',
       provider: 'deepseek',
-      name: 'DeepSeek Reasoner',
-      group: 'DeepSeek Reasoner'
+      name: 'DeepSeek V4 Pro',
+      group: 'DeepSeek V4'
     }
   ],
   together: [

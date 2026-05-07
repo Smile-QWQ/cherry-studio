@@ -61,6 +61,21 @@ describe('ModelMessageService', () => {
     expect(result).toEqual(mockMessages)
   })
 
+  it('should insert empty messages between consecutive same-role messages for deepseek-v4-pro model', () => {
+    const model = { id: 'deepseek-v4-pro' } as Model
+    const result = processReqMessages(model, mockMessages)
+
+    expect(result.length).toBe(8)
+    expect(result[1]).toEqual({
+      role: 'assistant',
+      content: ''
+    })
+    expect(result[4]).toEqual({
+      role: 'user',
+      content: ''
+    })
+  })
+
   it('should handle empty messages array', () => {
     const model = { id: 'deepseek-reasoner' } as Model
     const result = processReqMessages(model, [])
