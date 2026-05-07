@@ -37,7 +37,6 @@ const getWechatRuntimeCandidates = () => [
 
 const getWcocrDllCandidates = () => [
   path.join(process.cwd(), 'resources', 'wechat-ocr', 'wcocr.dll'),
-  path.join(process.cwd(), 'wx-ocr', 'wechat-ocr', 'vs.proj', 'x64', 'Release', 'wcocr.dll'),
   path.join(process.resourcesPath, 'resources', 'wechat-ocr', 'wcocr.dll'),
   path.join(process.resourcesPath, 'app.asar.unpacked', 'resources', 'wechat-ocr', 'wcocr.dll'),
   path.join(app.getAppPath(), 'resources', 'wechat-ocr', 'wcocr.dll'),
