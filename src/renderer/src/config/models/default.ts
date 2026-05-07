@@ -7,16 +7,23 @@ export const qwenModel: Model = {
   group: 'Qwen'
 }
 
+export const forkDefaultModel: Model = {
+  id: 'deepseek-chat',
+  name: 'DeepSeek Chat',
+  provider: 'deepseek',
+  group: 'DeepSeek'
+}
+
 export const SYSTEM_MODELS: Record<SystemProviderId | 'defaultModel', Model[]> = {
   defaultModel: [
     // Default assistant model
-    qwenModel,
+    forkDefaultModel,
     // Default topic naming model
-    qwenModel,
+    forkDefaultModel,
     // Default translation model
-    qwenModel,
+    forkDefaultModel,
     // Default quick assistant model
-    qwenModel
+    forkDefaultModel
   ],
   cherryin: [],
   vertexai: [],

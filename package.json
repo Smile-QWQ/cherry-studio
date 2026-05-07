@@ -2,11 +2,11 @@
   "name": "CherryStudio",
   "version": "1.9.4",
   "private": true,
-  "description": "A powerful AI assistant for producer.",
-  "desktopName": "CherryStudio.desktop",
+  "description": "A powerful AI assistant fork for producers.",
+  "desktopName": "CherryStudioFork.desktop",
   "main": "./out/main/index.js",
-  "author": "support@cherry-ai.com",
-  "homepage": "https://github.com/CherryHQ/cherry-studio",
+  "author": "Smile-QWQ",
+  "homepage": "https://github.com/Smile-QWQ/cherry-studio",
   "engines": {
     "node": ">=24.11.1"
   },

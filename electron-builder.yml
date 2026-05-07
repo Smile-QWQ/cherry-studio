@@ -1,5 +1,5 @@
-appId: com.kangfenmao.CherryStudio
-productName: Cherry Studio
+appId: com.smileqwq.CherryStudio
+productName: Cherry Studio Fork
 electronLanguages:
   - zh-CN
   - zh-TW
@@ -76,7 +76,7 @@ asarUnpack:
   - "node_modules/@img/sharp-*/**"
 
 win:
-  executableName: Cherry Studio
+  executableName: Cherry Studio Fork
   artifactName: ${productName}-${version}-${arch}-setup.${ext}
   target:
     - target: nsis
@@ -113,7 +113,7 @@ dmg:
   writeUpdateInfo: false
 linux:
   artifactName: ${productName}-${version}-${arch}.${ext}
-  executableName: CherryStudio
+  executableName: CherryStudioFork
   target:
     - target: AppImage
     - target: deb
@@ -122,8 +122,8 @@ linux:
   category: Utility
   desktop:
     entry:
-      Name: Cherry Studio
-      StartupWMClass: CherryStudio
+      Name: Cherry Studio Fork
+      StartupWMClass: CherryStudioFork
   mimeTypes:
     - x-scheme-handler/cherrystudio
 rpm:
@@ -131,8 +131,10 @@ rpm:
   # https://github.com/electron/forge/issues/3594
   fpm: ["--rpm-rpmbuild-define=_build_id_links none"]
 publish:
-  provider: generic
-  url: https://releases.cherry-ai.com
+  provider: github
+  owner: Smile-QWQ
+  repo: cherry-studio
+  releaseType: release
 electronDownload:
   mirror: https://npmmirror.com/mirrors/electron/
 beforePack: scripts/before-pack.js

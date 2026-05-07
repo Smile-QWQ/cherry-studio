@@ -163,7 +163,7 @@ export const SYSTEM_PROVIDERS_CONFIG: Record<SystemProviderId, SystemProvider> =
     anthropicApiHost: 'https://api.deepseek.com/anthropic',
     models: SYSTEM_MODELS.deepseek,
     isSystem: true,
-    enabled: false
+    enabled: true
   },
   alayanew: {
     id: 'alayanew',

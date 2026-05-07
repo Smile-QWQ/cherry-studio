@@ -338,7 +338,7 @@ export const initialState: SettingsState = {
   translateModelPrompt: TRANSLATE_PROMPT,
   autoTranslateWithSpace: false,
   showTranslateConfirm: true,
-  enableTopicNaming: true,
+  enableTopicNaming: false,
   customCss: '',
   topicNamingPrompt: '',
   sidebarIcons: {

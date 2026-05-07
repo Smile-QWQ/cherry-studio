@@ -1,6 +1,7 @@
 import { isMac } from '@main/constant'
 import { windowService } from '@main/services/WindowService'
 import { locales } from '@main/utils/locales'
+import { APP_DOCS_URL, APP_ISSUES_URL, APP_RELEASES_URL, APP_REPOSITORY_URL } from '@shared/config/constant'
 import { IpcChannel } from '@shared/IpcChannel'
 import type { MenuItemConstructorOptions } from 'electron'
 import { app, Menu, shell } from 'electron'
@@ -99,25 +100,25 @@ export class AppMenuService {
           {
             label: appMenu.website,
             click: () => {
-              void shell.openExternal('https://cherry-ai.com')
+              void shell.openExternal(APP_REPOSITORY_URL)
             }
           },
           {
             label: appMenu.documentation,
             click: () => {
-              void shell.openExternal('https://cherry-ai.com/docs')
+              void shell.openExternal(APP_DOCS_URL)
             }
           },
           {
             label: appMenu.feedback,
             click: () => {
-              void shell.openExternal('https://github.com/CherryHQ/cherry-studio/issues/new/choose')
+              void shell.openExternal(APP_ISSUES_URL)
             }
           },
           {
             label: appMenu.releases,
             click: () => {
-              void shell.openExternal('https://github.com/CherryHQ/cherry-studio/releases')
+              void shell.openExternal(APP_RELEASES_URL)
             }
           }
         ]

@@ -7,12 +7,17 @@ import { useTheme } from '@renderer/context/ThemeProvider'
 import { useMinappPopup } from '@renderer/hooks/useMinappPopup'
 import { useRuntime } from '@renderer/hooks/useRuntime'
 import { useSettings } from '@renderer/hooks/useSettings'
-import i18n from '@renderer/i18n'
 import { useAppDispatch } from '@renderer/store'
 import { setUpdateState } from '@renderer/store/runtime'
 import { ThemeMode } from '@renderer/types'
 import { runAsyncFunction } from '@renderer/utils'
-import { UpgradeChannel } from '@shared/config/constant'
+import {
+  APP_DOCS_URL,
+  APP_ISSUES_URL,
+  APP_RELEASES_URL,
+  APP_REPOSITORY_URL,
+  UpgradeChannel
+} from '@shared/config/constant'
 import { Avatar, Button, Progress, Radio, Row, Switch, Tag, Tooltip } from 'antd'
 import { debounce } from 'lodash'
 import { Briefcase, Bug, Building2, Github, Globe, Mail, Rss } from 'lucide-react'
@@ -68,7 +73,7 @@ const AboutSettings: FC = () => {
   }
 
   const mailto = async () => {
-    const email = 'support@cherry-ai.com'
+    const email = 'noreply@users.noreply.github.com'
     const subject = `${APP_NAME} Feedback`
     const version = (await window.api.getAppInfo()).version
     const platform = window.electron.process.platform
@@ -81,7 +86,7 @@ const AboutSettings: FC = () => {
   }
 
   const showEnterprise = async () => {
-    onOpenWebsite('https://enterprise.cherry-ai.com')
+    onOpenWebsite(APP_REPOSITORY_URL)
   }
 
   const showReleases = async () => {
@@ -169,8 +174,7 @@ const AboutSettings: FC = () => {
   }, [autoCheckUpdate, setAutoCheckUpdate])
 
   const onOpenDocs = () => {
-    const isChinese = i18n.language.startsWith('zh')
-    void window.api.openWebsite(isChinese ? 'https://docs.cherry-ai.com/' : 'https://docs.cherry-ai.com/docs/en-us')
+    void window.api.openWebsite(APP_DOCS_URL)
   }
 
   return (
@@ -179,7 +183,7 @@ const AboutSettings: FC = () => {
         <SettingTitle>
           {t('settings.about.title')}
           <HStack alignItems="center">
-            <Link to="https://github.com/CherryHQ/cherry-studio">
+            <Link to={APP_REPOSITORY_URL}>
               <GithubOutlined style={{ marginRight: 4, color: 'var(--color-text)', fontSize: 20 }} />
             </Link>
           </HStack>
@@ -187,7 +191,7 @@ const AboutSettings: FC = () => {
         <SettingDivider />
         <AboutHeader>
           <Row align="middle">
-            <AvatarWrapper onClick={() => onOpenWebsite('https://github.com/CherryHQ/cherry-studio')}>
+            <AvatarWrapper onClick={() => onOpenWebsite(APP_REPOSITORY_URL)}>
               {update.downloadProgress > 0 && (
                 <ProgressCircle
                   type="circle"
@@ -204,7 +208,7 @@ const AboutSettings: FC = () => {
               <Title>{APP_NAME}</Title>
               <Description>{t('settings.about.description')}</Description>
               <Tag
-                onClick={() => onOpenWebsite('https://github.com/CherryHQ/cherry-studio/releases')}
+                onClick={() => onOpenWebsite(APP_RELEASES_URL)}
                 color="cyan"
                 style={{ marginTop: 8, cursor: 'pointer' }}>
                 v{version}
@@ -299,7 +303,7 @@ const AboutSettings: FC = () => {
             <Globe size={18} />
             {t('settings.about.website.title')}
           </SettingRowTitle>
-          <Button onClick={() => onOpenWebsite('https://cherry-ai.com')}>{t('settings.about.website.button')}</Button>
+          <Button onClick={() => onOpenWebsite(APP_REPOSITORY_URL)}>{t('settings.about.website.button')}</Button>
         </SettingRow>
         <SettingDivider />
         <SettingRow>
@@ -307,9 +311,7 @@ const AboutSettings: FC = () => {
             <Github size={18} />
             {t('settings.about.feedback.title')}
           </SettingRowTitle>
-          <Button onClick={() => onOpenWebsite('https://github.com/CherryHQ/cherry-studio/issues/new/choose')}>
-            {t('settings.about.feedback.button')}
-          </Button>
+          <Button onClick={() => onOpenWebsite(APP_ISSUES_URL)}>{t('settings.about.feedback.button')}</Button>
         </SettingRow>
         <SettingDivider />
         <SettingRow>
@@ -333,9 +335,7 @@ const AboutSettings: FC = () => {
             <Briefcase size={18} />
             {t('settings.about.careers.title')}
           </SettingRowTitle>
-          <Button onClick={() => onOpenWebsite('https://www.cherry-ai.com/careers')}>
-            {t('settings.about.careers.button')}
-          </Button>
+          <Button onClick={() => onOpenWebsite(APP_REPOSITORY_URL)}>{t('settings.about.careers.button')}</Button>
         </SettingRow>
         <SettingDivider />
         <SettingRow>

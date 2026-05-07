@@ -23,7 +23,13 @@ import {
   isMac
 } from '@renderer/config/constant'
 import { allMinApps } from '@renderer/config/minapps'
-import { isFunctionCallingModel, isNotSupportTextDeltaModel, qwenModel, SYSTEM_MODELS } from '@renderer/config/models'
+import {
+  forkDefaultModel,
+  isFunctionCallingModel,
+  isNotSupportTextDeltaModel,
+  qwenModel,
+  SYSTEM_MODELS
+} from '@renderer/config/models'
 import { BUILTIN_OCR_PROVIDERS, BUILTIN_OCR_PROVIDERS_MAP, DEFAULT_OCR_PROVIDER } from '@renderer/config/ocr'
 import { TRANSLATE_PROMPT } from '@renderer/config/prompts'
 import { SYSTEM_PROVIDERS } from '@renderer/config/providers'
@@ -3410,6 +3416,36 @@ const migrateConfig = {
       return state
     } catch (error) {
       logger.error('migrate 206 error', error as Error)
+      return state
+    }
+  },
+  '207': (state: RootState) => {
+    try {
+      if (state.llm.defaultModel?.provider === 'cherryai') {
+        state.llm.defaultModel = forkDefaultModel
+      }
+      if (state.llm.quickModel?.provider === 'cherryai') {
+        state.llm.quickModel = forkDefaultModel
+      }
+      if (state.llm.translateModel?.provider === 'cherryai') {
+        state.llm.translateModel = forkDefaultModel
+      }
+
+      state.settings.enableTopicNaming = false
+
+      state.assistants.assistants.forEach((assistant) => {
+        if (assistant.model?.provider === 'cherryai') {
+          assistant.model = forkDefaultModel
+        }
+        if (assistant.defaultModel?.provider === 'cherryai') {
+          assistant.defaultModel = forkDefaultModel
+        }
+      })
+
+      logger.info('migrate 207 success')
+      return state
+    } catch (error) {
+      logger.error('migrate 207 error', error as Error)
       return state
     }
   }

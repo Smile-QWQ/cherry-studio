@@ -197,14 +197,20 @@ export const MB = 1024 * KB
 export const GB = 1024 * MB
 export const defaultLanguage = 'en-US'
 
+export const APP_REPOSITORY_URL = 'https://github.com/Smile-QWQ/cherry-studio'
+export const APP_RELEASES_URL = `${APP_REPOSITORY_URL}/releases`
+export const APP_ISSUES_URL = `${APP_REPOSITORY_URL}/issues/new/choose`
+export const APP_DOCS_URL = `${APP_REPOSITORY_URL}#readme`
+export const GITHUB_RELEASE_OWNER = 'Smile-QWQ'
+export const GITHUB_RELEASE_REPO = 'cherry-studio'
+
 export enum FeedUrl {
-  PRODUCTION = 'https://releases.cherry-ai.com',
-  GITHUB_LATEST = 'https://github.com/CherryHQ/cherry-studio/releases/latest/download'
+  GITHUB_LATEST = 'https://github.com/Smile-QWQ/cherry-studio/releases/latest/download'
 }
 
 export enum UpdateConfigUrl {
-  GITHUB = 'https://raw.githubusercontent.com/CherryHQ/cherry-studio/refs/heads/x-files/app-upgrade-config/app-upgrade-config.json',
-  GITCODE = 'https://raw.gitcode.com/CherryHQ/cherry-studio/raw/x-files%2Fapp-upgrade-config/app-upgrade-config.json'
+  GITHUB = 'https://raw.githubusercontent.com/Smile-QWQ/cherry-studio/refs/heads/main/app-upgrade-config.json',
+  GITCODE = 'https://raw.githubusercontent.com/Smile-QWQ/cherry-studio/refs/heads/main/app-upgrade-config.json'
 }
 
 export enum UpgradeChannel {
