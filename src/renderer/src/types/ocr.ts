@@ -5,6 +5,7 @@ import { isImageFileMetadata } from '.'
 
 export const BuiltinOcrProviderIds = {
   tesseract: 'tesseract',
+  wechat_ocr: 'wechat_ocr',
   system: 'system',
   paddleocr: 'paddleocr',
   ovocr: 'ovocr'
@@ -77,7 +78,22 @@ export type OcrProviderBaseConfig = {
   enabled?: boolean
 }
 
-export type OcrProviderConfig = OcrApiProviderConfig | OcrTesseractConfig | OcrSystemConfig | OcrPpocrConfig
+export type WeChatOcrDetectionResult = {
+  installed: boolean
+  available: boolean
+  wechatInstallPath?: string
+  wechatOcrBinaryPath?: string
+  wcocrDllPath?: string
+  detectedVersion?: string
+  reason?: string
+}
+
+export type OcrProviderConfig =
+  | OcrApiProviderConfig
+  | OcrTesseractConfig
+  | OcrSystemConfig
+  | OcrPpocrConfig
+  | OcrWechatConfig
 
 export type OcrProvider = {
   id: string
@@ -95,7 +111,29 @@ export type OcrApiProvider = OcrProvider & {
 }
 
 export const isOcrApiProvider = (p: OcrProvider): p is OcrApiProvider => {
+  if (p.id === BuiltinOcrProviderIds.wechat_ocr) {
+    return false
+  }
   return !!(p.config && p.config.api && isOcrProviderApiConfig(p.config.api))
+}
+
+export type OcrWechatConfig = OcrProviderBaseConfig & {
+  available?: boolean
+  wechatInstallPath?: string
+  wechatOcrBinaryPath?: string
+  wcocrDllPath?: string
+  detectedVersion?: string
+  reason?: string
+}
+
+export type OcrWechatProvider = {
+  id: 'wechat_ocr'
+  config: OcrWechatConfig
+} & ImageOcrProvider &
+  BuiltinOcrProvider
+
+export const isOcrWechatProvider = (p: OcrProvider): p is OcrWechatProvider => {
+  return p.id === BuiltinOcrProviderIds.wechat_ocr
 }
 
 export type BuiltinOcrProvider = OcrProvider & {

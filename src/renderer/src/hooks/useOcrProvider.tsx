@@ -6,10 +6,10 @@ import { BUILTIN_OCR_PROVIDERS_MAP, DEFAULT_OCR_PROVIDER } from '@renderer/confi
 import { getBuiltinOcrProviderLabel } from '@renderer/i18n/label'
 import { useAppSelector } from '@renderer/store'
 import { addOcrProvider, removeOcrProvider, setImageOcrProviderId, updateOcrProviderConfig } from '@renderer/store/ocr'
-import type { ImageOcrProvider, OcrProvider, OcrProviderConfig } from '@renderer/types'
+import type { ImageOcrProvider, OcrProvider, OcrProviderConfig, WeChatOcrDetectionResult } from '@renderer/types'
 import { isBuiltinOcrProvider, isBuiltinOcrProviderId, isImageOcrProvider } from '@renderer/types'
 import { Avatar } from 'antd'
-import { FileQuestionMarkIcon, MonitorIcon } from 'lucide-react'
+import { FileQuestionMarkIcon, MessageCircleMoreIcon, MonitorIcon } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDispatch } from 'react-redux'
@@ -21,6 +21,7 @@ export const useOcrProviders = () => {
   const imageProviders = providers.filter(isImageOcrProvider)
   const imageProviderId = useAppSelector((state) => state.ocr.imageProviderId)
   const [imageProvider, setImageProvider] = useState<ImageOcrProvider>(DEFAULT_OCR_PROVIDER.image)
+  const [wechatDetection, setWechatDetection] = useState<WeChatOcrDetectionResult | null>(null)
   const dispatch = useDispatch()
   const { t } = useTranslation()
 
@@ -74,6 +75,8 @@ export const useOcrProviders = () => {
       switch (p.id) {
         case 'tesseract':
           return <Avatar size={size} src={TesseractLogo} />
+        case 'wechat_ocr':
+          return <MessageCircleMoreIcon size={size} />
         case 'system':
           return <MonitorIcon size={size} />
         case 'paddleocr':
@@ -100,9 +103,43 @@ export const useOcrProviders = () => {
     }
   }, [addProvider, imageProviderId, imageProviders, setImageProviderId])
 
+  const refreshWechatDetection = useCallback(async () => {
+    try {
+      const result = await window.api.ocr.detectWeChat()
+      setWechatDetection(result)
+
+      const provider = providers.find((item) => item.id === 'wechat_ocr')
+      if (provider) {
+        dispatch(
+          updateOcrProviderConfig({
+            id: provider.id,
+            update: {
+              available: result.available,
+              wechatInstallPath: result.wechatInstallPath,
+              wechatOcrBinaryPath: result.wechatOcrBinaryPath,
+              wcocrDllPath: result.wcocrDllPath,
+              detectedVersion: result.detectedVersion,
+              reason: result.reason
+            }
+          })
+        )
+      }
+      return result
+    } catch (error) {
+      logger.warn('Failed to detect WeChat OCR', error as Error)
+      return null
+    }
+  }, [dispatch, providers])
+
+  useEffect(() => {
+    void refreshWechatDetection()
+  }, [refreshWechatDetection])
+
   return {
     providers,
     imageProvider,
+    wechatDetection,
+    refreshWechatDetection,
     addProvider,
     removeProvider,
     setImageProviderId,

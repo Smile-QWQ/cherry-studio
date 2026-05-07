@@ -3,6 +3,9 @@ import type { Assistant, FileMetadata, Topic } from '@renderer/types'
 import { FILE_TYPE } from '@renderer/types'
 import type { SerializedError } from '@renderer/types/error'
 import type {
+  AttachmentExtractionFailure,
+  AttachmentExtractionItem,
+  AttachmentExtractionMessageBlock,
   BaseMessageBlock,
   CitationMessageBlock,
   CodeMessageBlock,
@@ -188,6 +191,53 @@ export function createFileBlock(
   return {
     ...createBaseMessageBlock(messageId, MessageBlockType.FILE, overrides),
     file
+  }
+}
+
+/**
+ * Creates an Attachment Extraction Message Block.
+ * This block is user-visible, but it is not part of the editable main text.
+ */
+export function createAttachmentExtractionBlock(
+  messageId: string,
+  {
+    items,
+    failed,
+    totalInjectedChars,
+    usedVisionFallbackToOcr,
+    defaultSelectedFileId
+  }: {
+    items: AttachmentExtractionItem[]
+    failed: AttachmentExtractionFailure[]
+    totalInjectedChars: number
+    usedVisionFallbackToOcr: boolean
+    defaultSelectedFileId?: string
+  },
+  overrides: Partial<
+    Omit<
+      AttachmentExtractionMessageBlock,
+      | 'id'
+      | 'messageId'
+      | 'type'
+      | 'items'
+      | 'failed'
+      | 'totalInjectedChars'
+      | 'usedVisionFallbackToOcr'
+      | 'defaultSelectedFileId'
+    >
+  > = {}
+): AttachmentExtractionMessageBlock {
+  const baseBlock = createBaseMessageBlock(messageId, MessageBlockType.ATTACHMENT_EXTRACTION, {
+    status: MessageBlockStatus.SUCCESS,
+    ...overrides
+  })
+  return {
+    ...baseBlock,
+    items,
+    failed,
+    totalInjectedChars,
+    usedVisionFallbackToOcr,
+    defaultSelectedFileId
   }
 }
 

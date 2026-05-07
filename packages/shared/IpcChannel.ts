@@ -398,6 +398,8 @@ export enum IpcChannel {
   // OCR
   OCR_ocr = 'ocr:ocr',
   OCR_ListProviders = 'ocr:list-providers',
+  OCR_DetectWeChat = 'ocr:detect-wechat',
+  OCR_RefreshWeChatDetection = 'ocr:refresh-wechat-detection',
 
   // OVMS
   Ovms_IsSupported = 'ovms:is-supported',

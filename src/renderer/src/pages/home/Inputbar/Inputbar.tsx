@@ -9,9 +9,11 @@ import {
   isWebSearchModel
 } from '@renderer/config/models'
 import db from '@renderer/databases'
-import { useAssistant } from '@renderer/hooks/useAssistant'
+import { useAssistant, useDefaultModel } from '@renderer/hooks/useAssistant'
+import { useAttachmentPreprocess } from '@renderer/hooks/useAttachmentPreprocess'
 import { useInputText } from '@renderer/hooks/useInputText'
 import { useMessageOperations, useTopicLoading } from '@renderer/hooks/useMessageOperations'
+import { useOcrProviders } from '@renderer/hooks/useOcrProvider'
 import { useSettings } from '@renderer/hooks/useSettings'
 import { useShortcut } from '@renderer/hooks/useShortcuts'
 import { useTextareaResize } from '@renderer/hooks/useTextareaResize'
@@ -23,6 +25,10 @@ import {
   useInputbarToolsState
 } from '@renderer/pages/home/Inputbar/context/InputbarToolsProvider'
 import { getDefaultTopic } from '@renderer/services/AssistantService'
+import {
+  applyAttachmentProcessedResultsToBlocks,
+  hasVisualExtractionResult
+} from '@renderer/services/AttachmentTextExtractionService'
 import { CacheService } from '@renderer/services/CacheService'
 import { EVENT_NAMES, EventEmitter } from '@renderer/services/EventService'
 import FileManager from '@renderer/services/FileManager'
@@ -40,7 +46,11 @@ import {
   type Topic,
   TopicType
 } from '@renderer/types'
-import type { MessageInputBaseParams } from '@renderer/types/newMessage'
+import type {
+  AttachmentExtractionFailure,
+  AttachmentExtractionItem,
+  MessageInputBaseParams
+} from '@renderer/types/newMessage'
 import { delay } from '@renderer/utils'
 import { getSendMessageShortcutLabel } from '@renderer/utils/input'
 import { documentExts, imageExts, textExts } from '@shared/config/constant'
@@ -61,6 +71,7 @@ const logger = loggerService.withContext('Inputbar')
 const INPUTBAR_DRAFT_CACHE_KEY = 'inputbar-draft'
 const DRAFT_CACHE_TTL = 24 * 60 * 60 * 1000 // 24 hours
 
+const isImageBlock = (block: { type: string }) => block.type === 'image'
 const getMentionedModelsCacheKey = (assistantId: string) => `inputbar-mentioned-models-${assistantId}`
 
 const getValidatedCachedModels = (assistantId: string): Model[] => {
@@ -159,7 +170,9 @@ const InputbarInner: FC<InputbarInnerProps> = ({ assistant: initialAssistant, se
   })
 
   const { assistant, addTopic, model, setModel, updateAssistant } = useAssistant(initialAssistant.id)
-  const { sendMessageShortcut, showInputEstimatedTokens, enableQuickPanelTriggers } = useSettings()
+  const { sendMessageShortcut, showInputEstimatedTokens, enableQuickPanelTriggers, imageProcessMethod } = useSettings()
+  const { visionModel } = useDefaultModel()
+  const { imageProvider } = useOcrProviders()
   const [estimateTokenCount, setEstimateTokenCount] = useState(0)
   const [contextCount, setContextCount] = useState({ current: 0, max: 0 })
 
@@ -187,12 +200,21 @@ const InputbarInner: FC<InputbarInnerProps> = ({ assistant: initialAssistant, se
   )
 
   const canAddImageFile = useMemo(() => {
-    return isVisionSupported || isGenerateImageSupported
-  }, [isGenerateImageSupported, isVisionSupported])
+    // 纯文本模型现在也允许先挂图片附件。
+    // 是否真正把图片送入模型，由发送前预处理分支决定：
+    // - 视觉模型：保持既有传图行为；
+    // - 非视觉模型：先抽取文本，再通过隐藏上下文注入给模型。
+    return true
+  }, [])
 
   const canAddTextFile = useMemo(() => {
     return isVisionSupported || (!isVisionSupported && !isGenerateImageSupported)
   }, [isGenerateImageSupported, isVisionSupported])
+
+  const shouldPreprocessAttachments = useMemo(
+    () => !isVisionSupported && !isGenerateImageSupported,
+    [isGenerateImageSupported, isVisionSupported]
+  )
 
   const supportedExts = useMemo(() => {
     if (canAddImageFile && canAddTextFile) {
@@ -209,6 +231,16 @@ const InputbarInner: FC<InputbarInnerProps> = ({ assistant: initialAssistant, se
 
     return []
   }, [canAddImageFile, canAddTextFile])
+
+  const { attachmentPreprocessSnapshot, attachmentPreprocessStates, removeAttachment } = useAttachmentPreprocess({
+    files,
+    setFiles,
+    enabled: shouldPreprocessAttachments,
+    allowDocuments: canAddTextFile,
+    imageProcessMethod,
+    imageProvider,
+    visionModel
+  })
 
   useEffect(() => {
     setCouldAddImageFile(canAddImageFile)
@@ -246,9 +278,18 @@ const InputbarInner: FC<InputbarInnerProps> = ({ assistant: initialAssistant, se
     void EventEmitter.emit(EVENT_NAMES.SEND_MESSAGE, { topicId: topic.id, traceId: parent?.spanContext().traceId })
 
     try {
-      const uploadedFiles = await FileManager.uploadFiles(files)
+      const uploadedFiles = shouldPreprocessAttachments
+        ? await Promise.all(files.map((file) => (FileManager.isStoredFile(file) ? file : FileManager.uploadFile(file))))
+        : await FileManager.uploadFiles(files)
 
-      const baseUserMessage: MessageInputBaseParams = { assistant, topic, content: text }
+      const baseUserMessage: MessageInputBaseParams & {
+        attachmentExtraction?: {
+          items: AttachmentExtractionItem[]
+          failed: AttachmentExtractionFailure[]
+          totalInjectedChars: number
+          usedVisionFallbackToOcr: boolean
+        }
+      } = { assistant, topic, content: text }
       if (uploadedFiles) {
         baseUserMessage.files = uploadedFiles
       }
@@ -256,9 +297,46 @@ const InputbarInner: FC<InputbarInnerProps> = ({ assistant: initialAssistant, se
         baseUserMessage.mentions = mentionedModels
       }
 
+      if (shouldPreprocessAttachments) {
+        if (attachmentPreprocessSnapshot.hasPendingProcessableAttachments) {
+          window.toast.warning(t('attachment.extraction.wait_for_completion', '请等待附件解析完成后再发送'))
+          return
+        }
+
+        if (
+          !text.trim() &&
+          attachmentPreprocessSnapshot.hasProcessableAttachments &&
+          !attachmentPreprocessSnapshot.hasAnySuccess
+        ) {
+          window.toast.error(t('chat.input.file_error'))
+          return
+        }
+
+        if (attachmentPreprocessSnapshot.usedVisionFallbackToOcr) {
+          window.toast.warning(t('message.error.file.vision.model_fallback_to_ocr'))
+        }
+
+        if (attachmentPreprocessSnapshot.hasAnySuccess || attachmentPreprocessSnapshot.failed.length > 0) {
+          baseUserMessage.attachmentExtraction = {
+            items: attachmentPreprocessSnapshot.items,
+            failed: attachmentPreprocessSnapshot.failed,
+            totalInjectedChars: attachmentPreprocessSnapshot.totalInjectedChars,
+            usedVisionFallbackToOcr: attachmentPreprocessSnapshot.usedVisionFallbackToOcr
+          }
+        }
+      }
+
       baseUserMessage.usage = await estimateUserPromptUsage(baseUserMessage)
 
       const { message, blocks } = getUserMessage(baseUserMessage)
+      if (shouldPreprocessAttachments && hasVisualExtractionResult(attachmentPreprocessSnapshot)) {
+        // 保留原附件 block，同时把图片处理结果挂到 block metadata。
+        // 这给后续 UI 展示或重复发送去重留下扩展空间。
+        applyAttachmentProcessedResultsToBlocks(
+          blocks.filter(isImageBlock),
+          attachmentPreprocessSnapshot.items.filter((result) => result.blockType === 'image')
+        )
+      }
       message.traceId = parent?.spanContext().traceId
 
       void dispatch(_sendMessage(message, blocks, assistant, topic.id))
@@ -284,7 +362,10 @@ const InputbarInner: FC<InputbarInnerProps> = ({ assistant: initialAssistant, se
     setFiles,
     setTimeoutTimer,
     resizeTextArea,
-    focusTextarea
+    focusTextarea,
+    attachmentPreprocessSnapshot,
+    shouldPreprocessAttachments,
+    t
   ])
 
   const tokenCountProps = useMemo(() => {
@@ -512,6 +593,8 @@ const InputbarInner: FC<InputbarInnerProps> = ({ assistant: initialAssistant, se
       leftToolbar={leftToolbar}
       rightToolbar={rightToolbar}
       topContent={topContent}
+      attachmentPreprocessStates={attachmentPreprocessStates}
+      onRemoveAttachment={removeAttachment}
     />
   )
 }

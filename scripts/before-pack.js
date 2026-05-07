@@ -56,6 +56,23 @@ exports.default = async function (context) {
   const arch = context.arch === Arch.arm64 ? 'arm64' : 'x64'
   const platformName = context.packager.platform.name
   const platform = platformToArch[platformName]
+  const projectRoot = path.join(__dirname, '..')
+
+  // Copy local WeChat OCR bridge DLL into resources for Windows packaging.
+  // Development mode can still use the workspace build output directly.
+  if (platform === 'win32' && arch === 'x64') {
+    const wcocrSource = path.join(projectRoot, 'wx-ocr', 'wechat-ocr', 'vs.proj', 'x64', 'Release', 'wcocr.dll')
+    const wcocrTargetDir = path.join(projectRoot, 'resources', 'wechat-ocr')
+    const wcocrTarget = path.join(wcocrTargetDir, 'wcocr.dll')
+
+    if (fs.existsSync(wcocrSource)) {
+      fs.mkdirSync(wcocrTargetDir, { recursive: true })
+      fs.copyFileSync(wcocrSource, wcocrTarget)
+      console.log(`Copied wcocr.dll to resources: ${wcocrTarget}`)
+    } else {
+      console.warn(`Warning: wcocr.dll not found at ${wcocrSource}, packaged WeChat OCR may be unavailable.`)
+    }
+  }
 
   // Download rtk binary for the target platform
   try {

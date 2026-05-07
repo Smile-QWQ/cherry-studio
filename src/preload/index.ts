@@ -45,7 +45,8 @@ import type {
   StopApiServerStatusResult,
   SupportedOcrFile,
   ThemeMode,
-  WebDavConfig
+  WebDavConfig,
+  WeChatOcrDetectionResult
 } from '@types'
 import type { OpenDialogOptions } from 'electron'
 import { contextBridge, ipcRenderer, shell, webUtils } from 'electron'
@@ -728,7 +729,10 @@ const api = {
   ocr: {
     ocr: (file: SupportedOcrFile, provider: OcrProvider): Promise<OcrResult> =>
       ipcRenderer.invoke(IpcChannel.OCR_ocr, file, provider),
-    listProviders: (): Promise<string[]> => ipcRenderer.invoke(IpcChannel.OCR_ListProviders)
+    listProviders: (): Promise<string[]> => ipcRenderer.invoke(IpcChannel.OCR_ListProviders),
+    detectWeChat: (): Promise<WeChatOcrDetectionResult> => ipcRenderer.invoke(IpcChannel.OCR_DetectWeChat),
+    refreshWeChatDetection: (): Promise<WeChatOcrDetectionResult> =>
+      ipcRenderer.invoke(IpcChannel.OCR_RefreshWeChatDetection)
   },
   cherryai: {
     generateSignature: (params: { method: string; path: string; query: string; body: Record<string, any> }) =>

@@ -14,6 +14,19 @@ export const forkDefaultModel: Model = {
   group: 'DeepSeek'
 }
 
+export const DEFAULT_MODELS = {
+  assistant: forkDefaultModel,
+  quick: forkDefaultModel,
+  translate: forkDefaultModel,
+  quickAssistant: forkDefaultModel,
+  vision: {
+    id: 'gemini-2.5-flash-image-preview',
+    name: 'Gemini 2.5 Flash Image',
+    provider: 'gemini',
+    group: 'Gemini 2.5'
+  } satisfies Model
+} as const
+
 export const SYSTEM_MODELS: Record<SystemProviderId | 'defaultModel', Model[]> = {
   defaultModel: [
     // Default assistant model

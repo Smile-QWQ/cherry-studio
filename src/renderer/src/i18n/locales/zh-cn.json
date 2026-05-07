@@ -982,6 +982,19 @@
     },
     "title": "助手"
   },
+  "attachment": {
+    "extraction": {
+      "fallback_to_ocr": "视觉失败后已回退 OCR",
+      "source": {
+        "document": "文档抽取",
+        "ocr": "图片 OCR",
+        "vision_model": "视觉模型"
+      },
+      "title": "附件提取结果",
+      "truncated": "已截断",
+      "wait_for_completion": "请等待附件解析完成后再发送"
+    }
+  },
   "auth": {
     "error": "自动获取密钥失败，请手动获取",
     "get_key": "获取",
@@ -2319,7 +2332,10 @@
       "fetchTopicName": "话题命名失败",
       "file": {
         "process_failed": "文件 {{name}} 无法处理",
-        "text_extraction_failed": "无法从 {{name}} 中提取文本"
+        "text_extraction_failed": "无法从 {{name}} 中提取文本",
+        "vision": {
+          "model_fallback_to_ocr": "未配置可用视觉模型，已自动回退为 OCR 处理"
+        }
       },
       "get_embedding_dimensions": "获取嵌入维度失败",
       "invalid": {
@@ -2873,7 +2889,8 @@
   },
   "ocr": {
     "builtin": {
-      "system": "系统 OCR"
+      "system": "系统 OCR",
+      "wechat_ocr": "微信 OCR"
     },
     "error": {
       "provider": {
@@ -2893,6 +2910,18 @@
       "provider": {
         "fallback": "已回退到 {{name}}，这可能导致问题"
       }
+    },
+    "wechat": {
+      "available": "已检测到，可用",
+      "bridge_path": "桥接 DLL 路径",
+      "detecting": "正在检测",
+      "install_path": "微信安装路径",
+      "installed_but_unavailable": "已安装，但 OCR 组件不可用",
+      "not_installed": "未检测到微信 OCR",
+      "ocr_path": "OCR 组件路径",
+      "reason": "不可用原因",
+      "refresh": "重新检测",
+      "status": "检测状态"
     }
   },
   "ollama": {
@@ -5006,6 +5035,9 @@
         "confirm_delete_message": "删除消息前确认",
         "confirm_regenerate_message": "重新生成消息前确认",
         "enable_quick_triggers": "启用 / 和 @ 触发快捷菜单",
+        "image_process": {
+          "title": "图片处理"
+        },
         "paste_long_text_as_file": "长文本粘贴为文件",
         "paste_long_text_threshold": "长文本长度",
         "send_shortcuts": "发送快捷键",
@@ -5188,7 +5220,11 @@
       "translate_model_prompt_message": "请输入翻译模型提示词",
       "translate_model_prompt_title": "翻译模型提示词",
       "use_assistant": "使用助手",
-      "use_model": "默认模型"
+      "use_model": "默认模型",
+      "vision": {
+        "description": "当当前对话模型不支持视觉时，可使用视觉模型先提取图片信息，再把结果注入发送正文。",
+        "label": "视觉模型"
+      }
     },
     "moresetting": {
       "check": {
@@ -6031,6 +6067,12 @@
   },
   "warning": {
     "missing_provider": "供应商不存在，已回退到默认供应商 {{provider}}。这可能导致问题。"
+  },
+  "wechat_ocr": {
+    "bridge_missing": "未找到 WeChat OCR 桥接 DLL",
+    "component_missing": "缺少微信 OCR 组件或微信运行时目录",
+    "not_detected": "未检测到微信安装或 OCR 组件",
+    "only_supported_on_windows": "WeChat OCR 仅支持 Windows"
   },
   "words": {
     "knowledgeGraph": "知识图谱",

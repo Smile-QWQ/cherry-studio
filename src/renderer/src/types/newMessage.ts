@@ -29,6 +29,7 @@ export enum MessageBlockType {
   CODE = 'code', // 代码块
   TOOL = 'tool', // Added unified tool block type
   FILE = 'file', // 文件内容
+  ATTACHMENT_EXTRACTION = 'attachment_extraction', // 附件提取结果
   ERROR = 'error', // 错误信息
   CITATION = 'citation', // 引用类型 (Now includes web search, grounding, etc.)
   VIDEO = 'video', // 视频内容
@@ -105,6 +106,7 @@ export interface ImageMessageBlock extends BaseMessageBlock {
     prompt?: string
     negativePrompt?: string
     generateImageResponse?: GenerateImageResponse
+    processedResult?: string
   }
 }
 
@@ -132,6 +134,32 @@ export interface CitationMessageBlock extends BaseMessageBlock {
 export interface FileMessageBlock extends BaseMessageBlock {
   type: MessageBlockType.FILE
   file: FileMetadata // 文件信息
+}
+
+export type AttachmentExtractionSource = 'ocr' | 'vision_model' | 'document'
+
+export type AttachmentExtractionItem = {
+  fileId: string
+  fileName: string
+  text: string
+  source: AttachmentExtractionSource
+  truncated: boolean
+  blockType: 'image' | 'file'
+}
+
+export type AttachmentExtractionFailure = {
+  fileId: string
+  fileName: string
+  error: string
+}
+
+export interface AttachmentExtractionMessageBlock extends BaseMessageBlock {
+  type: MessageBlockType.ATTACHMENT_EXTRACTION
+  items: AttachmentExtractionItem[]
+  failed: AttachmentExtractionFailure[]
+  totalInjectedChars: number
+  usedVisionFallbackToOcr: boolean
+  defaultSelectedFileId?: string
 }
 
 // 视频块
@@ -163,6 +191,7 @@ export type MessageBlock =
   | ImageMessageBlock
   | ToolMessageBlock
   | FileMessageBlock
+  | AttachmentExtractionMessageBlock
   | ErrorMessageBlock
   | CitationMessageBlock
   | VideoMessageBlock

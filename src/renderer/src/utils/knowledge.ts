@@ -18,7 +18,8 @@ export const CONTENT_TYPES = {
   TRANSLATION: 'translations',
   ERROR: 'errors',
   FILE: 'files',
-  IMAGES: 'images'
+  IMAGES: 'images',
+  ATTACHMENT_EXTRACTION: 'attachment_extraction'
 } as const
 
 export type ContentType = (typeof CONTENT_TYPES)[keyof typeof CONTENT_TYPES]
@@ -36,6 +37,7 @@ export interface MessageContentStats {
   citations: number // 引用数量
   translations: number // 翻译数量
   errors: number // 错误数量
+  attachment_extraction: number // 附件提取结果数量
 }
 
 /**
@@ -82,7 +84,8 @@ export function analyzeMessageContent(message: Message): MessageContentStats {
     tools: 0,
     citations: 0,
     translations: 0,
-    errors: 0
+    errors: 0,
+    attachment_extraction: 0
   }
 
   for (const block of blocks) {
@@ -121,6 +124,9 @@ export function analyzeMessageContent(message: Message): MessageContentStats {
         break
       case MessageBlockType.ERROR:
         stats.errors++
+        break
+      case MessageBlockType.ATTACHMENT_EXTRACTION:
+        stats.attachment_extraction++
         break
       case MessageBlockType.UNKNOWN:
         // 占位符块不计入统计
@@ -249,6 +255,19 @@ function processTextlikeBlocks(block: MessageBlock, selectedTypes: Set<ContentTy
       return `<translation target="${translationBlock.targetLanguage}">\n${translationBlock.content}\n</translation>`
     }
 
+    case MessageBlockType.ATTACHMENT_EXTRACTION: {
+      if (!selectedTypes.has(CONTENT_TYPES.ATTACHMENT_EXTRACTION)) return ''
+      const extractionBlock = block
+      return `<attachment_extraction>\n${JSON.stringify(
+        {
+          items: extractionBlock.items,
+          failed: extractionBlock.failed
+        },
+        null,
+        2
+      )}\n</attachment_extraction>`
+    }
+
     case MessageBlockType.UNKNOWN:
       // 占位符块，通常不需要输出内容
       return ''
@@ -296,6 +315,7 @@ export async function analyzeTopicContent(topic: Topic): Promise<TopicContentSta
     citations: 0,
     translations: 0,
     errors: 0,
+    attachment_extraction: 0,
     messages: messages.length
   }
 
@@ -313,6 +333,7 @@ export async function analyzeTopicContent(topic: Topic): Promise<TopicContentSta
     stats.citations += messageStats.citations
     stats.translations += messageStats.translations
     stats.errors += messageStats.errors
+    stats.attachment_extraction += messageStats.attachment_extraction
   }
 
   return stats

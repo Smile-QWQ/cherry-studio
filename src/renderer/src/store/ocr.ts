@@ -55,7 +55,7 @@ const ocrSlice = createSlice({
     },
     updateOcrProviderConfig(
       state,
-      action: PayloadAction<{ id: string; update: Omit<Partial<OcrProviderConfig>, 'id'> }>
+      action: PayloadAction<{ id: string; update: Partial<OcrProviderConfig> & Record<string, unknown> }>
     ) {
       const index = state.providers.findIndex((provider) => provider.id === action.payload.id)
       if (index !== -1) {

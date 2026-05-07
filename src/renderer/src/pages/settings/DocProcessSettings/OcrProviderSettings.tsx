@@ -13,6 +13,7 @@ import { OcrOVSettings } from './OcrOVSettings'
 import { OcrPpocrSettings } from './OcrPpocrSettings'
 import { OcrSystemSettings } from './OcrSystemSettings'
 import { OcrTesseractSettings } from './OcrTesseractSettings'
+import { OcrWechatSettings } from './OcrWechatSettings'
 
 // const logger = loggerService.withContext('OcrTesseractSettings')
 
@@ -33,6 +34,8 @@ const OcrProviderSettings = ({ provider }: Props) => {
       switch (provider.id) {
         case 'tesseract':
           return <OcrTesseractSettings />
+        case 'wechat_ocr':
+          return <OcrWechatSettings />
         case 'system':
           return <OcrSystemSettings />
         case 'paddleocr':

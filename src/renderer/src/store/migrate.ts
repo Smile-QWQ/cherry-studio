@@ -24,6 +24,7 @@ import {
 } from '@renderer/config/constant'
 import { allMinApps } from '@renderer/config/minapps'
 import {
+  DEFAULT_MODELS,
   forkDefaultModel,
   isFunctionCallingModel,
   isNotSupportTextDeltaModel,
@@ -3441,7 +3442,8 @@ const migrateConfig = {
           assistant.defaultModel = forkDefaultModel
         }
       })
-
+      state.settings.imageProcessMethod ||= 'ocr'
+      state.llm.visionModel ||= DEFAULT_MODELS.vision
       logger.info('migrate 207 success')
       return state
     } catch (error) {

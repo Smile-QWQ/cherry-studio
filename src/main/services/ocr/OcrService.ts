@@ -7,6 +7,7 @@ import { ovOcrService } from './builtin/OvOcrService'
 import { ppocrService } from './builtin/PpocrService'
 import { systemOcrService } from './builtin/SystemOcrService'
 import { tesseractService } from './builtin/TesseractService'
+import { weChatDllOcrService } from './builtin/WeChatDllOcrService'
 
 const logger = loggerService.withContext('OcrService')
 
@@ -40,6 +41,8 @@ export class OcrService {
 export const ocrService = new OcrService()
 
 // Register built-in providers
+ocrService.register(BuiltinOcrProviderIds.wechat_ocr, weChatDllOcrService.ocr.bind(weChatDllOcrService))
+
 ocrService.register(BuiltinOcrProviderIds.tesseract, tesseractService.ocr.bind(tesseractService))
 
 !isLinux && ocrService.register(BuiltinOcrProviderIds.system, systemOcrService.ocr.bind(systemOcrService))

@@ -982,6 +982,19 @@
     },
     "title": "Agent"
   },
+  "attachment": {
+    "extraction": {
+      "fallback_to_ocr": "[to be translated]:Fell back to OCR after vision processing failed",
+      "source": {
+        "document": "[to be translated]:Document extraction",
+        "ocr": "[to be translated]:Image OCR",
+        "vision_model": "[to be translated]:Vision model"
+      },
+      "title": "[to be translated]:Attachment extraction results",
+      "truncated": "[to be translated]:Truncated",
+      "wait_for_completion": "[to be translated]:Please wait for attachment extraction to finish before sending"
+    }
+  },
   "auth": {
     "error": "Échec de l'obtention automatique de la clé, veuillez la récupérer manuellement",
     "get_key": "Obtenir",
@@ -2319,7 +2332,10 @@
       "fetchTopicName": "Échec de la nomination du sujet",
       "file": {
         "process_failed": "Le fichier {{name}} n'a pas pu être traité",
-        "text_extraction_failed": "Impossible d'extraire le texte de {{name}}"
+        "text_extraction_failed": "Impossible d'extraire le texte de {{name}}",
+        "vision": {
+          "model_fallback_to_ocr": "[to be translated]:No vision model is configured, automatically fell back to OCR"
+        }
       },
       "get_embedding_dimensions": "Impossible d'obtenir les dimensions d'encodage",
       "invalid": {
@@ -2873,7 +2889,8 @@
   },
   "ocr": {
     "builtin": {
-      "system": "OCR système"
+      "system": "OCR système",
+      "wechat_ocr": "[to be translated]:WeChat OCR"
     },
     "error": {
       "provider": {
@@ -2893,6 +2910,18 @@
       "provider": {
         "fallback": "Revenu à {{name}}, ce qui pourrait entraîner des problèmes"
       }
+    },
+    "wechat": {
+      "available": "[to be translated]:Detected and available",
+      "bridge_path": "[to be translated]:Bridge DLL path",
+      "detecting": "[to be translated]:Detecting",
+      "install_path": "[to be translated]:WeChat install path",
+      "installed_but_unavailable": "[to be translated]:Installed, but OCR component is unavailable",
+      "not_installed": "[to be translated]:WeChat OCR not detected",
+      "ocr_path": "[to be translated]:OCR component path",
+      "reason": "[to be translated]:Unavailable reason",
+      "refresh": "[to be translated]:Re-detect",
+      "status": "[to be translated]:Detection status"
     }
   },
   "ollama": {
@@ -5006,6 +5035,9 @@
         "confirm_delete_message": "Confirmer avant de supprimer le message",
         "confirm_regenerate_message": "Confirmer avant de régénérer le message",
         "enable_quick_triggers": "Activer les menus rapides avec '/' et '@'",
+        "image_process": {
+          "title": "[to be translated]:Image processing"
+        },
         "paste_long_text_as_file": "Coller le texte long sous forme de fichier",
         "paste_long_text_threshold": "Seuil de longueur de texte",
         "send_shortcuts": "Raccourcis d'envoi",
@@ -5188,7 +5220,11 @@
       "translate_model_prompt_message": "Entrez le mot-clé du modèle de traduction",
       "translate_model_prompt_title": "Mot-clé du modèle de traduction",
       "use_assistant": "Utiliser l'assistant",
-      "use_model": "Modèle par défaut"
+      "use_model": "Modèle par défaut",
+      "vision": {
+        "description": "[to be translated]:When the current chat model does not support vision, use a vision model to extract image information and inject it into the message body before sending.",
+        "label": "[to be translated]:Vision model"
+      }
     },
     "moresetting": {
       "check": {
@@ -6031,6 +6067,12 @@
   },
   "warning": {
     "missing_provider": "Le fournisseur n’existe pas, retour au fournisseur par défaut {{provider}}. Cela peut entraîner des problèmes."
+  },
+  "wechat_ocr": {
+    "bridge_missing": "[to be translated]:WeChat OCR bridge DLL not found",
+    "component_missing": "[to be translated]:WeChat OCR component or runtime directory is missing",
+    "not_detected": "[to be translated]:WeChat installation or OCR component was not detected",
+    "only_supported_on_windows": "[to be translated]:WeChat OCR is only supported on Windows"
   },
   "words": {
     "knowledgeGraph": "Graphe de connaissances",

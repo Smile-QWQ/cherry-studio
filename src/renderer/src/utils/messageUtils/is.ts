@@ -1,6 +1,7 @@
 import type { Message } from '@renderer/types/newMessage'
 import {
   AssistantMessageStatus,
+  type AttachmentExtractionMessageBlock,
   type CitationMessageBlock,
   type CodeMessageBlock,
   type CompactMessageBlock,
@@ -45,6 +46,10 @@ export function isImageBlock(block: MessageBlock): block is ImageMessageBlock {
  */
 export function isFileBlock(block: MessageBlock): block is FileMessageBlock {
   return block.type === MessageBlockType.FILE
+}
+
+export function isAttachmentExtractionBlock(block: MessageBlock): block is AttachmentExtractionMessageBlock {
+  return block.type === MessageBlockType.ATTACHMENT_EXTRACTION
 }
 
 /**
@@ -101,12 +106,14 @@ export function isTextLikeBlock(
   | ThinkingMessageBlock
   | TranslationMessageBlock
   | CodeMessageBlock
+  | AttachmentExtractionMessageBlock
   | ErrorMessageBlock {
   return (
     block.type === MessageBlockType.MAIN_TEXT ||
     block.type === MessageBlockType.THINKING ||
     block.type === MessageBlockType.TRANSLATION ||
     block.type === MessageBlockType.CODE ||
+    block.type === MessageBlockType.ATTACHMENT_EXTRACTION ||
     block.type === MessageBlockType.ERROR
   )
 }

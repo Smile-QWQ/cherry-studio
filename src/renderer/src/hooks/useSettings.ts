@@ -21,6 +21,7 @@ import {
   setAutoCheckUpdate as _setAutoCheckUpdate,
   setDisableHardwareAcceleration,
   setEnableDeveloperMode,
+  setImageProcessMethod as _setImageProcessMethod,
   setLaunchOnBoot,
   setLaunchToTray,
   setNavbarPosition,
@@ -37,7 +38,7 @@ import {
   setUseSystemTitleBar as _setUseSystemTitleBar,
   setWindowStyle
 } from '@renderer/store/settings'
-import type { SidebarIcon, ThemeMode, TranslateLanguageCode } from '@renderer/types'
+import type { ImageProcessMethod, SidebarIcon, ThemeMode, TranslateLanguageCode } from '@renderer/types'
 import type { UpgradeChannel } from '@shared/config/constant'
 
 export function useSettings() {
@@ -118,6 +119,9 @@ export function useSettings() {
     setDisableHardwareAcceleration(disableHardwareAcceleration: boolean) {
       dispatch(setDisableHardwareAcceleration(disableHardwareAcceleration))
       void window.api.setDisableHardwareAcceleration(disableHardwareAcceleration)
+    },
+    setImageProcessMethod(method: ImageProcessMethod) {
+      dispatch(_setImageProcessMethod(method))
     },
     setUseSystemTitleBar(useSystemTitleBar: boolean) {
       dispatch(_setUseSystemTitleBar(useSystemTitleBar))

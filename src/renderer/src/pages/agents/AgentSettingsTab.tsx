@@ -25,6 +25,7 @@ import {
   setConfirmRegenerateMessage,
   setEnableQuickPanelTriggers,
   setFontSize,
+  setImageProcessMethod,
   setMathEnableSingleDollar,
   setMathEngine,
   setMessageFont,
@@ -36,7 +37,7 @@ import {
   setShowTranslateConfirm,
   setThoughtAutoCollapse
 } from '@renderer/store/settings'
-import type { CodeStyleVarious, MathEngine } from '@renderer/types'
+import type { CodeStyleVarious, ImageProcessMethod, MathEngine } from '@renderer/types'
 import { ThemeMode } from '@renderer/types'
 import { getSendMessageShortcutLabel } from '@renderer/utils/input'
 import { Col, Row, Slider, Switch } from 'antd'
@@ -81,7 +82,8 @@ const AgentSettingsTab = () => {
     enableQuickPanelTriggers,
     showTranslateConfirm,
     confirmDeleteMessage,
-    confirmRegenerateMessage
+    confirmRegenerateMessage,
+    imageProcessMethod
   } = useSettings()
 
   const codeStyle = useMemo(() => {
@@ -390,6 +392,19 @@ const AgentSettingsTab = () => {
               size="small"
               checked={renderInputMessageAsMarkdown}
               onChange={(checked) => dispatch(setRenderInputMessageAsMarkdown(checked))}
+            />
+          </SettingRow>
+          <SettingDivider />
+          <SettingRow>
+            <SettingRowTitleSmall>{t('settings.messages.input.image_process.title')}</SettingRowTitleSmall>
+            <Selector
+              value={imageProcessMethod}
+              onChange={(value) => dispatch(setImageProcessMethod(value as ImageProcessMethod))}
+              options={[
+                { value: 'ocr', label: 'OCR' },
+                { value: 'vision_model', label: t('settings.models.vision.label') },
+                { value: 'off', label: t('common.off') }
+              ]}
             />
           </SettingRow>
           <SettingDivider />

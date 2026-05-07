@@ -9,6 +9,10 @@ import dayjs from 'dayjs'
 const logger = loggerService.withContext('FileManager')
 
 class FileManager {
+  static isStoredFile(file: FileMetadata): boolean {
+    return file.name === `${file.id}${file.ext}`
+  }
+
   static async selectFiles(options?: Electron.OpenDialogOptions): Promise<FileMetadata[] | null> {
     return await window.api.file.select(options)
   }
