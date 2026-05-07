@@ -2,15 +2,20 @@ import { loggerService } from '@logger'
 import IntelLogo from '@renderer/assets/images/providers/intel.png'
 import PaddleocrLogo from '@renderer/assets/images/providers/paddleocr.png'
 import TesseractLogo from '@renderer/assets/images/providers/Tesseract.js.png'
-import { BUILTIN_OCR_PROVIDERS_MAP, DEFAULT_OCR_PROVIDER } from '@renderer/config/ocr'
+import { BUILTIN_OCR_PROVIDERS, BUILTIN_OCR_PROVIDERS_MAP, DEFAULT_OCR_PROVIDER } from '@renderer/config/ocr'
 import { getBuiltinOcrProviderLabel } from '@renderer/i18n/label'
 import { useAppSelector } from '@renderer/store'
-import { addOcrProvider, removeOcrProvider, setImageOcrProviderId, updateOcrProviderConfig } from '@renderer/store/ocr'
+import {
+  addOcrProvider as addOcrProviderAction,
+  removeOcrProvider,
+  setImageOcrProviderId,
+  updateOcrProviderConfig
+} from '@renderer/store/ocr'
 import type { ImageOcrProvider, OcrProvider, OcrProviderConfig, WeChatOcrDetectionResult } from '@renderer/types'
 import { isBuiltinOcrProvider, isBuiltinOcrProviderId, isImageOcrProvider } from '@renderer/types'
 import { Avatar } from 'antd'
 import { FileQuestionMarkIcon, MessageCircleMoreIcon, MonitorIcon } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDispatch } from 'react-redux'
 
@@ -24,6 +29,10 @@ export const useOcrProviders = () => {
   const [wechatDetection, setWechatDetection] = useState<WeChatOcrDetectionResult | null>(null)
   const dispatch = useDispatch()
   const { t } = useTranslation()
+  const missingBuiltinProviders = useMemo(
+    () => BUILTIN_OCR_PROVIDERS.filter((provider) => !providers.some((item) => item.id === provider.id)),
+    [providers]
+  )
 
   /**
    * 添加一个新的OCR服务提供者
@@ -38,7 +47,7 @@ export const useOcrProviders = () => {
         window.toast.error(t('ocr.error.provider.existing'))
         throw new Error(msg)
       }
-      dispatch(addOcrProvider(provider))
+      dispatch(addOcrProviderAction(provider))
     },
     [dispatch, providers, t]
   )
@@ -65,6 +74,15 @@ export const useOcrProviders = () => {
     },
     [dispatch]
   )
+
+  useEffect(() => {
+    if (missingBuiltinProviders.length === 0) return
+
+    missingBuiltinProviders.forEach((provider) => {
+      logger.info(`Restore missing builtin ocr provider: ${provider.id}`)
+      dispatch(addOcrProviderAction(provider))
+    })
+  }, [dispatch, missingBuiltinProviders])
 
   const getOcrProviderName = (p: OcrProvider) => {
     return isBuiltinOcrProvider(p) ? getBuiltinOcrProviderLabel(p.id) : p.name

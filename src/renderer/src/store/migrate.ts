@@ -3422,6 +3422,8 @@ const migrateConfig = {
   },
   '207': (state: RootState) => {
     try {
+      addOcrProvider(state, BUILTIN_OCR_PROVIDERS_MAP.wechat_ocr)
+
       if (state.llm.defaultModel?.provider === 'cherryai') {
         state.llm.defaultModel = forkDefaultModel
       }
@@ -3442,7 +3444,26 @@ const migrateConfig = {
           assistant.defaultModel = forkDefaultModel
         }
       })
+
+      const cherryinProvider = state.llm.providers.find((provider) => provider.id === 'cherryin')
+      const hasCherryInCredentials = !!(
+        cherryinProvider?.apiKey?.trim() ||
+        state.llm.settings?.cherryIn?.accessToken?.trim() ||
+        state.llm.settings?.cherryIn?.refreshToken?.trim()
+      )
+
+      if (cherryinProvider && !hasCherryInCredentials) {
+        cherryinProvider.enabled = false
+      }
+
+      const deepseekProvider = state.llm.providers.find((provider) => provider.id === 'deepseek')
+      if (deepseekProvider) {
+        deepseekProvider.enabled = true
+        state.llm.providers = moveProvider(state.llm.providers, 'deepseek', 1)
+      }
+
       state.settings.imageProcessMethod ||= 'ocr'
+      state.settings.defaultPaintingProvider ||= 'zhipu'
       state.llm.visionModel ||= DEFAULT_MODELS.vision
       logger.info('migrate 207 success')
       return state
