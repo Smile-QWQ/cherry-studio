@@ -2944,9 +2944,7 @@
       "connected": "Đã kết nối thành công với CherryIN"
     },
     "welcome": {
-      "login_cherryin": "Đăng nhập bằng CherryIN",
-      "or_continue_with": "HOẶC TIẾP TỤC VỚI",
-      "other_provider": "Chọn Nhà Cung Cấp Khác",
+      "configure_provider": "[to be translated]:Configure DeepSeek",
       "select_other_provider": "Chọn Nhà Cung Cấp Khác",
       "setup_hint": "Vui lòng cấu hình ít nhất một nhà cung cấp để có trải nghiệm tốt nhất",
       "subtitle": "Tận hưởng các dịch vụ AI hàng đầu với CherryIN",
@@ -5032,6 +5030,12 @@
         "label": "Kích hoạt chi tiết lưới"
       },
       "input": {
+        "attachment_extraction_limit_mode": {
+          "tip": "[to be translated]:Controls the maximum number of characters injected into the model from image OCR, vision extraction, logs, and document extraction. You can keep the defaults, set custom limits, or remove the limits entirely.",
+          "title": "[to be translated]:Attachment extraction length limit"
+        },
+        "attachment_extraction_max_file_chars": "[to be translated]:Max characters per attachment",
+        "attachment_extraction_max_total_chars": "[to be translated]:Max characters for all attachments",
         "confirm_delete_message": "Xác nhận trước khi xóa tin nhắn",
         "confirm_regenerate_message": "Xác nhận trước khi tạo lại tin nhắn",
         "enable_quick_triggers": "Kích hoạt các kích hoạt / và @",

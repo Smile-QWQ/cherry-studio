@@ -5,7 +5,13 @@ import {
 } from '@renderer/services/AttachmentTextExtractionService'
 import FileManager from '@renderer/services/FileManager'
 import * as RendererOcrService from '@renderer/services/ocr/OcrService'
-import type { FileMetadata, ImageProcessMethod, Model, OcrProvider } from '@renderer/types'
+import type {
+  AttachmentExtractionLimitMode,
+  FileMetadata,
+  ImageProcessMethod,
+  Model,
+  OcrProvider
+} from '@renderer/types'
 import { FILE_TYPE } from '@renderer/types'
 import type { AttachmentExtractionFailure, AttachmentExtractionItem } from '@renderer/types/newMessage'
 import type { Dispatch, SetStateAction } from 'react'
@@ -35,6 +41,9 @@ type UseAttachmentPreprocessParams = {
   imageProcessMethod: ImageProcessMethod
   imageProvider?: OcrProvider
   visionModel?: Model
+  attachmentExtractionLimitMode: AttachmentExtractionLimitMode
+  attachmentExtractionMaxFileChars: number
+  attachmentExtractionMaxTotalChars: number
 }
 
 const shouldPreprocessFile = (
@@ -70,7 +79,10 @@ export const useAttachmentPreprocess = ({
   allowDocuments,
   imageProcessMethod,
   imageProvider,
-  visionModel
+  visionModel,
+  attachmentExtractionLimitMode,
+  attachmentExtractionMaxFileChars,
+  attachmentExtractionMaxTotalChars
 }: UseAttachmentPreprocessParams) => {
   const [states, setStates] = useState<Record<string, AttachmentPreprocessState>>({})
   const statesRef = useRef(states)
@@ -158,7 +170,10 @@ export const useAttachmentPreprocess = ({
           imageProcessMethod,
           imageProvider,
           visionModel,
-          ocr: (ocrFile, provider) => RendererOcrService.ocr(ocrFile as any, provider)
+          ocr: (ocrFile, provider) => RendererOcrService.ocr(ocrFile as any, provider),
+          limitMode: attachmentExtractionLimitMode,
+          maxFileChars: attachmentExtractionMaxFileChars,
+          maxTotalChars: attachmentExtractionMaxTotalChars
         })
 
         if (!isStillTracked()) {
@@ -210,7 +225,19 @@ export const useAttachmentPreprocess = ({
         scheduledRef.current.delete(currentId)
       }
     },
-    [allowDocuments, enabled, imageProcessMethod, imageProvider, moveStateKey, setFiles, updateState, visionModel]
+    [
+      allowDocuments,
+      attachmentExtractionLimitMode,
+      attachmentExtractionMaxFileChars,
+      attachmentExtractionMaxTotalChars,
+      enabled,
+      imageProcessMethod,
+      imageProvider,
+      moveStateKey,
+      setFiles,
+      updateState,
+      visionModel
+    ]
   )
 
   useEffect(() => {

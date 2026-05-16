@@ -5030,6 +5030,12 @@
         "label": "Grid detail trigger"
       },
       "input": {
+        "attachment_extraction_limit_mode": {
+          "tip": "Controls the maximum number of characters injected into the model from image OCR, vision extraction, logs, and document extraction. You can keep the defaults, set custom limits, or remove the limits entirely.",
+          "title": "Attachment extraction length limit"
+        },
+        "attachment_extraction_max_file_chars": "Max characters per attachment",
+        "attachment_extraction_max_total_chars": "Max characters for all attachments",
         "confirm_delete_message": "Confirm before deleting messages",
         "confirm_regenerate_message": "Confirm before regenerating messages",
         "enable_quick_triggers": "Enable / and @ triggers",

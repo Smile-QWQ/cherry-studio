@@ -2944,9 +2944,7 @@
       "connected": "CherryINに正常に接続されました"
     },
     "welcome": {
-      "login_cherryin": "CherryINでログイン",
-      "or_continue_with": "または続行",
-      "other_provider": "他のプロバイダーを選択",
+      "configure_provider": "[to be translated]:Configure DeepSeek",
       "select_other_provider": "他のプロバイダーを選択",
       "setup_hint": "ベストな体験のために、少なくとも1つのプロバイダーを設定してください",
       "subtitle": "CherryINでトップクラスのAIサービスをお楽しみください",
@@ -5032,6 +5030,12 @@
         "label": "グリッド詳細トリガー"
       },
       "input": {
+        "attachment_extraction_limit_mode": {
+          "tip": "[to be translated]:Controls the maximum number of characters injected into the model from image OCR, vision extraction, logs, and document extraction. You can keep the defaults, set custom limits, or remove the limits entirely.",
+          "title": "[to be translated]:Attachment extraction length limit"
+        },
+        "attachment_extraction_max_file_chars": "[to be translated]:Max characters per attachment",
+        "attachment_extraction_max_total_chars": "[to be translated]:Max characters for all attachments",
         "confirm_delete_message": "メッセージ削除前に確認",
         "confirm_regenerate_message": "メッセージ再生成前に確認",
         "enable_quick_triggers": "/ と @ を有効にしてクイックメニューを表示します。",

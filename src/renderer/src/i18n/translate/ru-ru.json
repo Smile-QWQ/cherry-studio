@@ -2944,9 +2944,7 @@
       "connected": "Успешно подключено к CherryIN"
     },
     "welcome": {
-      "login_cherryin": "Войти через CherryIN",
-      "or_continue_with": "ИЛИ ПРОДОЛЖИТЬ С",
-      "other_provider": "Выбрать других поставщиков",
+      "configure_provider": "[to be translated]:Configure DeepSeek",
       "select_other_provider": "Выбрать другого поставщика",
       "setup_hint": "Пожалуйста, настройте хотя бы одного поставщика для лучшего опыта",
       "subtitle": "Наслаждайтесь услугами ИИ высшего уровня с CherryIN",
@@ -5032,6 +5030,12 @@
         "label": "Триггер для отображения подробной информации в сетке"
       },
       "input": {
+        "attachment_extraction_limit_mode": {
+          "tip": "[to be translated]:Controls the maximum number of characters injected into the model from image OCR, vision extraction, logs, and document extraction. You can keep the defaults, set custom limits, or remove the limits entirely.",
+          "title": "[to be translated]:Attachment extraction length limit"
+        },
+        "attachment_extraction_max_file_chars": "[to be translated]:Max characters per attachment",
+        "attachment_extraction_max_total_chars": "[to be translated]:Max characters for all attachments",
         "confirm_delete_message": "Подтверждать перед удалением сообщений",
         "confirm_regenerate_message": "Подтверждать перед пересозданием сообщений",
         "enable_quick_triggers": "Включите / и @, чтобы вызвать быстрое меню.",

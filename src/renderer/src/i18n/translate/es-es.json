@@ -2944,9 +2944,7 @@
       "connected": "Conectado con éxito a CherryIN"
     },
     "welcome": {
-      "login_cherryin": "Iniciar sesión con CherryIN",
-      "or_continue_with": "O CONTINUAR CON",
-      "other_provider": "Elegir Otros Proveedores",
+      "configure_provider": "[to be translated]:Configure DeepSeek",
       "select_other_provider": "Seleccionar Otro Proveedor",
       "setup_hint": "Por favor, configura al menos un proveedor para obtener la mejor experiencia.",
       "subtitle": "Disfruta de servicios de IA de primer nivel con CherryIN",
@@ -5032,6 +5030,12 @@
         "label": "Desencadenante de detalles de cuadrícula"
       },
       "input": {
+        "attachment_extraction_limit_mode": {
+          "tip": "[to be translated]:Controls the maximum number of characters injected into the model from image OCR, vision extraction, logs, and document extraction. You can keep the defaults, set custom limits, or remove the limits entirely.",
+          "title": "[to be translated]:Attachment extraction length limit"
+        },
+        "attachment_extraction_max_file_chars": "[to be translated]:Max characters per attachment",
+        "attachment_extraction_max_total_chars": "[to be translated]:Max characters for all attachments",
         "confirm_delete_message": "Confirmar antes de eliminar mensaje",
         "confirm_regenerate_message": "confirmar antes de regenerar el mensaje",
         "enable_quick_triggers": "Habilitar menú rápido con '/' y '@'",

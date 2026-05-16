@@ -22,6 +22,7 @@ import { DEFAULT_SIDEBAR_ICONS } from '@renderer/config/sidebar'
 import type {
   ApiServerConfig,
   AssistantsSortType,
+  AttachmentExtractionLimitMode,
   CodeStyleVarious,
   ImageProcessMethod,
   LanguageVarious,
@@ -250,6 +251,9 @@ export interface SettingsState {
   apiServer: ApiServerConfig
   showMessageOutline: boolean
   imageProcessMethod: ImageProcessMethod
+  attachmentExtractionLimitMode: AttachmentExtractionLimitMode
+  attachmentExtractionMaxFileChars: number
+  attachmentExtractionMaxTotalChars: number
 }
 
 export type MultiModelMessageStyle = 'horizontal' | 'vertical' | 'fold' | 'grid'
@@ -452,7 +456,10 @@ export const initialState: SettingsState = {
     apiKey: `cs-sk-${uuid()}`
   },
   showMessageOutline: false,
-  imageProcessMethod: 'ocr'
+  imageProcessMethod: 'ocr',
+  attachmentExtractionLimitMode: 'default',
+  attachmentExtractionMaxFileChars: 20_000,
+  attachmentExtractionMaxTotalChars: 60_000
 }
 
 const settingsSlice = createSlice({
@@ -905,6 +912,15 @@ const settingsSlice = createSlice({
     },
     setImageProcessMethod: (state, action: PayloadAction<ImageProcessMethod>) => {
       state.imageProcessMethod = action.payload
+    },
+    setAttachmentExtractionLimitMode: (state, action: PayloadAction<AttachmentExtractionLimitMode>) => {
+      state.attachmentExtractionLimitMode = action.payload
+    },
+    setAttachmentExtractionMaxFileChars: (state, action: PayloadAction<number>) => {
+      state.attachmentExtractionMaxFileChars = action.payload
+    },
+    setAttachmentExtractionMaxTotalChars: (state, action: PayloadAction<number>) => {
+      state.attachmentExtractionMaxTotalChars = action.payload
     }
   }
 })
@@ -1037,6 +1053,9 @@ export const {
   setNavbarPosition,
   setShowMessageOutline,
   setImageProcessMethod,
+  setAttachmentExtractionLimitMode,
+  setAttachmentExtractionMaxFileChars,
+  setAttachmentExtractionMaxTotalChars,
   // API Server actions
   setApiServerEnabled,
   setApiServerPort,

@@ -18,6 +18,9 @@ import store, { useAppDispatch, useAppSelector } from '@renderer/store'
 import type { AssistantIconType, SendMessageShortcut, SettingsState } from '@renderer/store/settings'
 import {
   setAssistantIconType,
+  setAttachmentExtractionLimitMode as _setAttachmentExtractionLimitMode,
+  setAttachmentExtractionMaxFileChars as _setAttachmentExtractionMaxFileChars,
+  setAttachmentExtractionMaxTotalChars as _setAttachmentExtractionMaxTotalChars,
   setAutoCheckUpdate as _setAutoCheckUpdate,
   setDisableHardwareAcceleration,
   setEnableDeveloperMode,
@@ -38,7 +41,13 @@ import {
   setUseSystemTitleBar as _setUseSystemTitleBar,
   setWindowStyle
 } from '@renderer/store/settings'
-import type { ImageProcessMethod, SidebarIcon, ThemeMode, TranslateLanguageCode } from '@renderer/types'
+import type {
+  AttachmentExtractionLimitMode,
+  ImageProcessMethod,
+  SidebarIcon,
+  ThemeMode,
+  TranslateLanguageCode
+} from '@renderer/types'
 import type { UpgradeChannel } from '@shared/config/constant'
 
 export function useSettings() {
@@ -122,6 +131,15 @@ export function useSettings() {
     },
     setImageProcessMethod(method: ImageProcessMethod) {
       dispatch(_setImageProcessMethod(method))
+    },
+    setAttachmentExtractionLimitMode(mode: AttachmentExtractionLimitMode) {
+      dispatch(_setAttachmentExtractionLimitMode(mode))
+    },
+    setAttachmentExtractionMaxFileChars(maxChars: number) {
+      dispatch(_setAttachmentExtractionMaxFileChars(maxChars))
+    },
+    setAttachmentExtractionMaxTotalChars(maxChars: number) {
+      dispatch(_setAttachmentExtractionMaxTotalChars(maxChars))
     },
     setUseSystemTitleBar(useSystemTitleBar: boolean) {
       dispatch(_setUseSystemTitleBar(useSystemTitleBar))

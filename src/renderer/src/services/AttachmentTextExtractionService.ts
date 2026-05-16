@@ -1,7 +1,14 @@
 import { loggerService } from '@logger'
 import AiProvider from '@renderer/aiCore/AiProvider'
 import { getProviderByModel } from '@renderer/services/AssistantService'
-import type { Assistant, FileMetadata, ImageProcessMethod, Model, OcrProvider } from '@renderer/types'
+import type {
+  Assistant,
+  AttachmentExtractionLimitMode,
+  FileMetadata,
+  ImageProcessMethod,
+  Model,
+  OcrProvider
+} from '@renderer/types'
 import { FILE_TYPE } from '@renderer/types'
 import type { StreamTextParams } from '@renderer/types/aiCoreTypes'
 import type {
@@ -43,6 +50,9 @@ type ExtractAttachmentTextsParams = {
   imageProvider?: OcrProvider
   visionModel?: Model
   ocr?: (file: FileMetadata, provider: OcrProvider) => Promise<string | OcrResult>
+  limitMode?: AttachmentExtractionLimitMode
+  maxFileChars?: number
+  maxTotalChars?: number
 }
 
 type ProcessImageResult = {
@@ -53,7 +63,44 @@ type ProcessImageResult = {
 
 const normalizeText = (value: string) => value.replace(/\r\n/g, '\n').trim()
 
+const normalizePositiveInteger = (value: number | undefined, fallback: number) => {
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    return fallback
+  }
+
+  return Math.max(1, Math.floor(value))
+}
+
+export function resolveAttachmentExtractionLimits({
+  limitMode = 'default',
+  maxFileChars,
+  maxTotalChars
+}: Pick<ExtractAttachmentTextsParams, 'limitMode' | 'maxFileChars' | 'maxTotalChars'>) {
+  if (limitMode === 'unlimited') {
+    return {
+      maxFileChars: Number.POSITIVE_INFINITY,
+      maxTotalChars: Number.POSITIVE_INFINITY
+    }
+  }
+
+  if (limitMode === 'custom') {
+    return {
+      maxFileChars: normalizePositiveInteger(maxFileChars, ATTACHMENT_INJECTION_MAX_FILE_CHARS),
+      maxTotalChars: normalizePositiveInteger(maxTotalChars, ATTACHMENT_INJECTION_MAX_TOTAL_CHARS)
+    }
+  }
+
+  return {
+    maxFileChars: ATTACHMENT_INJECTION_MAX_FILE_CHARS,
+    maxTotalChars: ATTACHMENT_INJECTION_MAX_TOTAL_CHARS
+  }
+}
+
 const truncateText = (text: string, maxChars: number) => {
+  if (!Number.isFinite(maxChars)) {
+    return { text, truncated: false }
+  }
+
   if (text.length <= maxChars) {
     return { text, truncated: false }
   }
@@ -252,7 +299,10 @@ export async function extractAttachmentTexts({
   imageProcessMethod,
   imageProvider,
   visionModel,
-  ocr
+  ocr,
+  limitMode,
+  maxFileChars,
+  maxTotalChars
 }: ExtractAttachmentTextsParams): Promise<AttachmentExtractionResult> {
   if (!files.length) {
     return {
@@ -270,6 +320,7 @@ export async function extractAttachmentTexts({
   let totalInjectedChars = 0
   let hasProcessableAttachments = false
   let usedVisionFallbackToOcr = false
+  const limits = resolveAttachmentExtractionLimits({ limitMode, maxFileChars, maxTotalChars })
 
   for (const file of files) {
     try {
@@ -298,11 +349,11 @@ export async function extractAttachmentTexts({
         continue
       }
 
-      const truncatedPerFile = truncateText(extractedText, ATTACHMENT_INJECTION_MAX_FILE_CHARS)
+      const truncatedPerFile = truncateText(extractedText, limits.maxFileChars)
       extractedText = truncatedPerFile.text
       truncated = truncatedPerFile.truncated
 
-      const remaining = ATTACHMENT_INJECTION_MAX_TOTAL_CHARS - totalInjectedChars
+      const remaining = limits.maxTotalChars - totalInjectedChars
       if (remaining <= 0) {
         break
       }

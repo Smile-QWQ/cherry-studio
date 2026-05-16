@@ -1223,6 +1223,7 @@ export const isHexColor = (value: string): value is HexColor => {
 }
 
 export type ImageProcessMethod = 'ocr' | 'vision_model' | 'off'
+export type AttachmentExtractionLimitMode = 'default' | 'custom' | 'unlimited'
 
 export type FetchChatCompletionRequestOptions = {
   signal?: AbortSignal

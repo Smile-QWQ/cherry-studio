@@ -29,7 +29,8 @@ import {
   ATTACHMENT_INJECTION_MAX_TOTAL_CHARS,
   buildAttachmentHiddenContext,
   extractAttachmentTexts,
-  hasVisualExtractionResult
+  hasVisualExtractionResult,
+  resolveAttachmentExtractionLimits
 } from '../AttachmentTextExtractionService'
 
 const visionModel: Model = {
@@ -289,6 +290,54 @@ describe('AttachmentTextExtractionService', () => {
     )
   })
 
+  it('allows custom extraction limits', async () => {
+    const longText = 'a'.repeat(1500)
+    vi.mocked(window.api.file.read).mockResolvedValueOnce(longText)
+
+    const file = createFile({
+      id: 'doc-custom',
+      origin_name: 'custom.txt',
+      ext: '.txt',
+      type: FILE_TYPE.TEXT
+    })
+
+    const result = await extractAttachmentTexts({
+      files: [file],
+      imageProcessMethod: 'ocr',
+      imageProvider,
+      limitMode: 'custom',
+      maxFileChars: 1000,
+      maxTotalChars: 2000
+    })
+
+    expect(result.results[0]?.truncated).toBe(true)
+    expect(result.results[0]?.text).toContain('[内容已截断')
+    expect(result.totalInjectedChars).toBeLessThanOrEqual(1100)
+  })
+
+  it('allows unlimited extraction limits', async () => {
+    const longText = 'a'.repeat(ATTACHMENT_INJECTION_MAX_FILE_CHARS + 5000)
+    vi.mocked(window.api.file.read).mockResolvedValueOnce(longText)
+
+    const file = createFile({
+      id: 'doc-unlimited',
+      origin_name: 'unlimited.txt',
+      ext: '.txt',
+      type: FILE_TYPE.TEXT
+    })
+
+    const result = await extractAttachmentTexts({
+      files: [file],
+      imageProcessMethod: 'ocr',
+      imageProvider,
+      limitMode: 'unlimited'
+    })
+
+    expect(result.results[0]?.truncated).toBe(false)
+    expect(result.results[0]?.text).toHaveLength(longText.length)
+    expect(result.totalInjectedChars).toBe(longText.length)
+  })
+
   it('builds hidden attachment context instead of mutating visible user text', () => {
     const hidden = buildAttachmentHiddenContext(
       [
@@ -333,5 +382,28 @@ describe('AttachmentTextExtractionService', () => {
       imageProvider
     })
     expect(hasVisualExtractionResult(textResult)).toBe(false)
+  })
+
+  it('resolves default, custom and unlimited extraction limit configs', () => {
+    expect(resolveAttachmentExtractionLimits({})).toEqual({
+      maxFileChars: ATTACHMENT_INJECTION_MAX_FILE_CHARS,
+      maxTotalChars: ATTACHMENT_INJECTION_MAX_TOTAL_CHARS
+    })
+
+    expect(
+      resolveAttachmentExtractionLimits({
+        limitMode: 'custom',
+        maxFileChars: 1234,
+        maxTotalChars: 5678
+      })
+    ).toEqual({
+      maxFileChars: 1234,
+      maxTotalChars: 5678
+    })
+
+    expect(resolveAttachmentExtractionLimits({ limitMode: 'unlimited' })).toEqual({
+      maxFileChars: Number.POSITIVE_INFINITY,
+      maxTotalChars: Number.POSITIVE_INFINITY
+    })
   })
 })

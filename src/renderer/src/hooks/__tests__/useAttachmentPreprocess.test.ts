@@ -111,7 +111,10 @@ describe('useAttachmentPreprocess', () => {
           allowDocuments: true,
           imageProcessMethod: 'vision_model',
           imageProvider,
-          visionModel
+          visionModel,
+          attachmentExtractionLimitMode: 'default',
+          attachmentExtractionMaxFileChars: 20_000,
+          attachmentExtractionMaxTotalChars: 60_000
         }),
       {
         initialProps: {
@@ -134,6 +137,13 @@ describe('useAttachmentPreprocess', () => {
     expect(setFiles).toHaveBeenCalled()
     expect(result.current.attachmentPreprocessSnapshot.items[0]?.text).toBe('extracted image text')
     expect(result.current.attachmentPreprocessSnapshot.hasPendingProcessableAttachments).toBe(false)
+    expect(extractAttachmentTextsMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        limitMode: 'default',
+        maxFileChars: 20_000,
+        maxTotalChars: 60_000
+      })
+    )
   })
 
   it('skips document preprocessing when documents are not allowed for the current model', async () => {
@@ -153,7 +163,10 @@ describe('useAttachmentPreprocess', () => {
         allowDocuments: false,
         imageProcessMethod: 'ocr',
         imageProvider,
-        visionModel
+        visionModel,
+        attachmentExtractionLimitMode: 'default',
+        attachmentExtractionMaxFileChars: 20_000,
+        attachmentExtractionMaxTotalChars: 60_000
       })
     )
 

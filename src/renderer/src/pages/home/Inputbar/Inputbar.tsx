@@ -170,7 +170,15 @@ const InputbarInner: FC<InputbarInnerProps> = ({ assistant: initialAssistant, se
   })
 
   const { assistant, addTopic, model, setModel, updateAssistant } = useAssistant(initialAssistant.id)
-  const { sendMessageShortcut, showInputEstimatedTokens, enableQuickPanelTriggers, imageProcessMethod } = useSettings()
+  const {
+    sendMessageShortcut,
+    showInputEstimatedTokens,
+    enableQuickPanelTriggers,
+    imageProcessMethod,
+    attachmentExtractionLimitMode,
+    attachmentExtractionMaxFileChars,
+    attachmentExtractionMaxTotalChars
+  } = useSettings()
   const { visionModel } = useDefaultModel()
   const { imageProvider } = useOcrProviders()
   const [estimateTokenCount, setEstimateTokenCount] = useState(0)
@@ -239,7 +247,10 @@ const InputbarInner: FC<InputbarInnerProps> = ({ assistant: initialAssistant, se
     allowDocuments: canAddTextFile,
     imageProcessMethod,
     imageProvider,
-    visionModel
+    visionModel,
+    attachmentExtractionLimitMode,
+    attachmentExtractionMaxFileChars,
+    attachmentExtractionMaxTotalChars
   })
 
   useEffect(() => {

@@ -2944,9 +2944,7 @@
       "connected": "Erfolgreich mit CherryIN verbunden"
     },
     "welcome": {
-      "login_cherryin": "Mit CherryIN anmelden",
-      "or_continue_with": "ODER WEITER MIT",
-      "other_provider": "Andere Anbieter auswählen",
+      "configure_provider": "[to be translated]:Configure DeepSeek",
       "select_other_provider": "Wählen Sie einen anderen Anbieter",
       "setup_hint": "Bitte konfigurieren Sie mindestens einen Anbieter für die beste Erfahrung.",
       "subtitle": "Genießen Sie erstklassige KI-Dienste mit CherryIN",
@@ -5032,6 +5030,12 @@
         "label": "Raster-Details-Trigger"
       },
       "input": {
+        "attachment_extraction_limit_mode": {
+          "tip": "[to be translated]:Controls the maximum number of characters injected into the model from image OCR, vision extraction, logs, and document extraction. You can keep the defaults, set custom limits, or remove the limits entirely.",
+          "title": "[to be translated]:Attachment extraction length limit"
+        },
+        "attachment_extraction_max_file_chars": "[to be translated]:Max characters per attachment",
+        "attachment_extraction_max_total_chars": "[to be translated]:Max characters for all attachments",
         "confirm_delete_message": "Vor Löschen von Nachrichten bestätigen",
         "confirm_regenerate_message": "Nachrichten vor Neugenerierung bestätigen",
         "enable_quick_triggers": "Aktivieren / und @ für Schnellmenü-Trigger",

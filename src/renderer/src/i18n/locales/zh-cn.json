@@ -5030,6 +5030,12 @@
         "label": "网格详情触发"
       },
       "input": {
+        "attachment_extraction_limit_mode": {
+          "tip": "控制图片 OCR、视觉提取、日志与文档抽取结果注入模型时的最大字符数。可使用默认值、自定义上限，或关闭长度限制。",
+          "title": "附件提取长度限制"
+        },
+        "attachment_extraction_max_file_chars": "单个附件最大字符数",
+        "attachment_extraction_max_total_chars": "全部附件最大字符数",
         "confirm_delete_message": "删除消息前确认",
         "confirm_regenerate_message": "重新生成消息前确认",
         "enable_quick_triggers": "启用 / 和 @ 触发快捷菜单",

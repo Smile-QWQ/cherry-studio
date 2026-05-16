@@ -177,7 +177,14 @@ const AgentSessionInputbarInner: FC<InnerProps> = ({ assistant, agentId, session
     customHeight,
     setCustomHeight
   } = useTextareaResize({ maxHeight: 500, minHeight: 30 })
-  const { sendMessageShortcut, apiServer, imageProcessMethod } = useSettings()
+  const {
+    sendMessageShortcut,
+    apiServer,
+    imageProcessMethod,
+    attachmentExtractionLimitMode,
+    attachmentExtractionMaxFileChars,
+    attachmentExtractionMaxTotalChars
+  } = useSettings()
   const { visionModel } = useDefaultModel()
   const { imageProvider } = useOcrProviders()
 
@@ -357,7 +364,10 @@ const AgentSessionInputbarInner: FC<InnerProps> = ({ assistant, agentId, session
     allowDocuments: canAddTextFile,
     imageProcessMethod,
     imageProvider,
-    visionModel
+    visionModel,
+    attachmentExtractionLimitMode,
+    attachmentExtractionMaxFileChars,
+    attachmentExtractionMaxTotalChars
   })
 
   const streamingAskIds = useMemo(() => {

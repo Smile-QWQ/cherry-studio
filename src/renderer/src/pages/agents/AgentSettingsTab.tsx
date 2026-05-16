@@ -12,6 +12,9 @@ import { CollapsibleSettingGroup } from '@renderer/pages/settings/SettingGroup'
 import { useAppDispatch } from '@renderer/store'
 import type { SendMessageShortcut } from '@renderer/store/settings'
 import {
+  setAttachmentExtractionLimitMode,
+  setAttachmentExtractionMaxFileChars,
+  setAttachmentExtractionMaxTotalChars,
   setAutoTranslateWithSpace,
   setCodeCollapsible,
   setCodeEditor,
@@ -37,7 +40,7 @@ import {
   setShowTranslateConfirm,
   setThoughtAutoCollapse
 } from '@renderer/store/settings'
-import type { CodeStyleVarious, ImageProcessMethod, MathEngine } from '@renderer/types'
+import type { AttachmentExtractionLimitMode, CodeStyleVarious, ImageProcessMethod, MathEngine } from '@renderer/types'
 import { ThemeMode } from '@renderer/types'
 import { getSendMessageShortcutLabel } from '@renderer/utils/input'
 import { Col, Row, Slider, Switch } from 'antd'
@@ -83,7 +86,10 @@ const AgentSettingsTab = () => {
     showTranslateConfirm,
     confirmDeleteMessage,
     confirmRegenerateMessage,
-    imageProcessMethod
+    imageProcessMethod,
+    attachmentExtractionLimitMode,
+    attachmentExtractionMaxFileChars,
+    attachmentExtractionMaxTotalChars
   } = useSettings()
 
   const codeStyle = useMemo(() => {
@@ -407,6 +413,56 @@ const AgentSettingsTab = () => {
               ]}
             />
           </SettingRow>
+          <SettingDivider />
+          <SettingRow>
+            <SettingRowTitleSmall>
+              {t('settings.messages.input.attachment_extraction_limit_mode.title')}
+              <HelpTooltip title={t('settings.messages.input.attachment_extraction_limit_mode.tip')} />
+            </SettingRowTitleSmall>
+            <Selector
+              value={attachmentExtractionLimitMode}
+              onChange={(value) => dispatch(setAttachmentExtractionLimitMode(value as AttachmentExtractionLimitMode))}
+              options={[
+                { value: 'default', label: t('common.default') },
+                { value: 'custom', label: t('common.custom') },
+                { value: 'unlimited', label: t('common.unlimited') }
+              ]}
+            />
+          </SettingRow>
+          {attachmentExtractionLimitMode === 'custom' && (
+            <>
+              <SettingDivider />
+              <SettingRow>
+                <SettingRowTitleSmall>
+                  {t('settings.messages.input.attachment_extraction_max_file_chars')}
+                </SettingRowTitleSmall>
+                <EditableNumber
+                  size="small"
+                  min={1000}
+                  max={1_000_000}
+                  step={1000}
+                  value={attachmentExtractionMaxFileChars}
+                  onChange={(value) => dispatch(setAttachmentExtractionMaxFileChars(value ?? 20_000))}
+                  style={{ width: 100 }}
+                />
+              </SettingRow>
+              <SettingDivider />
+              <SettingRow>
+                <SettingRowTitleSmall>
+                  {t('settings.messages.input.attachment_extraction_max_total_chars')}
+                </SettingRowTitleSmall>
+                <EditableNumber
+                  size="small"
+                  min={1000}
+                  max={5_000_000}
+                  step={1000}
+                  value={attachmentExtractionMaxTotalChars}
+                  onChange={(value) => dispatch(setAttachmentExtractionMaxTotalChars(value ?? 60_000))}
+                  style={{ width: 100 }}
+                />
+              </SettingRow>
+            </>
+          )}
           <SettingDivider />
           {!language.startsWith('en') && (
             <>

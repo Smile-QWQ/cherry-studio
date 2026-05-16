@@ -2944,9 +2944,7 @@
       "connected": "Συνδέθηκε επιτυχώς με το CherryIN"
     },
     "welcome": {
-      "login_cherryin": "Σύνδεση με CherryIN",
-      "or_continue_with": "Ή ΣΥΝΕΧΕΙΑ ΜΕ",
-      "other_provider": "Επιλέξτε Άλλους Παρόχους",
+      "configure_provider": "[to be translated]:Configure DeepSeek",
       "select_other_provider": "Επιλέξτε Άλλο Πάροχο",
       "setup_hint": "Παρακαλούμε ρυθμίστε τουλάχιστον έναν πάροχο για την καλύτερη εμπειρία",
       "subtitle": "Απολαύστε κορυφαίες υπηρεσίες τεχνητής νοημοσύνης με την CherryIN",
@@ -5032,6 +5030,12 @@
         "label": "Καταγραφή στοιχείων στο grid"
       },
       "input": {
+        "attachment_extraction_limit_mode": {
+          "tip": "[to be translated]:Controls the maximum number of characters injected into the model from image OCR, vision extraction, logs, and document extraction. You can keep the defaults, set custom limits, or remove the limits entirely.",
+          "title": "[to be translated]:Attachment extraction length limit"
+        },
+        "attachment_extraction_max_file_chars": "[to be translated]:Max characters per attachment",
+        "attachment_extraction_max_total_chars": "[to be translated]:Max characters for all attachments",
         "confirm_delete_message": "Επιβεβαίωση πριν τη διαγραφή μηνύματος",
         "confirm_regenerate_message": "Επιβεβαίωση πριν από την επαναδημιουργία του μηνύματος",
         "enable_quick_triggers": "Ενεργοποίηση των '/' και '@' για γρήγορη πρόσβαση σε μενού",

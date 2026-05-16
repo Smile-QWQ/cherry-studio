@@ -144,40 +144,28 @@ artifactBuildCompleted: scripts/artifact-build-completed.js
 releaseInfo:
   releaseNotes: |
     <!--LANG:en-->
-    Cherry Studio 1.9.6 - Bug Fixes
+    Cherry Studio Fork 1.9.6 - Better Attachment Processing
 
-    🐛 Bug Fixes
-    - [AI] Fixed crash when chat model's stored provider no longer exists
-    - [AI] Fixed streaming requests aborted after 30 minutes during active data transfer (affected models with extended thinking)
-    - [Agents] Fixed agent session creation failures when provider settings change
-    - [Agents] Fixed deepseek-r1 models incorrectly showing function_calling label causing errors in Agent mode
-    - [Agents] Use task name instead of agent name for cron task sessions
-    - [MCP] Fixed approval card not auto-expanding to show Run/Cancel buttons
-    - [MCP] Clean up OAuth tokens when deleting servers
-    - [Code Tools] Fixed Codex CLI launch failure when using OpenAI or other reserved providers
-    - [Claude Code] Fixed launch failures caused by auth conflicts with provider environment variables
-    - [Image] Fixed gpt-image-2 multi-turn editing crash
-    - [Knowledge] Fixed HTTP/HTTPS/FTP URLs being stripped from Markdown documents
-    - [OpenMinerU] Fixed preprocessing ENOENT errors due to ZIP structure change
-    - [Qiniu] Fixed PDF upload regression for GPT-5.4 models
-    - [Settings] Minor alignment fix for provider model list actions
+    ✨ New Features
+    - [Chat] Text-only models can now extract image content through OCR or a vision model before the main reply is generated
+    - [Chat] Attachment extraction results are shown in a dedicated result block without polluting the user's original message
+    - [OCR] Added a bundled WeChat OCR bridge with built-in detection for local Windows OCR workflows
+
+    💄 Improvements
+    - [Chat] Attachment extraction limits are now configurable, including custom per-file and total limits
+    - [Chat] Added an unlimited mode for large logs, text files, and other extracted attachment content
+    - [Fork] Onboarding and default models now prefer DeepSeek instead of the original built-in provider flow
 
     <!--LANG:zh-CN-->
-    Cherry Studio 1.9.6 - 错误修复
+    Cherry Studio Fork 1.9.6 - 附件处理增强
 
-    🐛 问题修复
-    - [AI] 修复聊天模型的存储提供商不存在时导致的崩溃
-    - [AI] 修复活跃数据传输期间流式请求在 30 分钟后被中断的问题（影响具有扩展思考的模型）
-    - [智能体] 修复提供商设置更改时智能体会话创建失败的问题
-    - [智能体] 修复 deepseek-r1 模型错误显示 function_calling 标签导致智能体模式出错
-    - [智能体] 定时任务会话现在使用任务名称而非智能体名称
-    - [MCP] 修复批准卡片未自动展开以显示运行/取消按钮的问题
-    - [MCP] 删除服务器时清理 OAuth 令牌
-    - [代码工具] 修复使用 OpenAI 或其他保留提供商时 Codex CLI 启动失败的问题
-    - [Claude Code] 修复提供商环境变量导致身份验证冲突从而无法启动的问题
-    - [图像] 修复 gpt-image-2 多轮编辑崩溃问题
-    - [知识库] 修复 Markdown 文档中的 HTTP/HTTPS/FTP URL 被移除的问题
-    - [OpenMinerU] 修复 ZIP 结构变更导致的预处理 ENOENT 错误
-    - [七牛云] 修复 GPT-5.4 模型的 PDF 上传回归问题
-    - [设置] 提供商模型列表操作的微小对齐修复
+    ✨ 新功能
+    - [聊天] 纯文本模型现在也能在主回复生成前，通过 OCR 或视觉模型提取图片内容
+    - [聊天] 附件提取结果会显示在独立结果块中，不再污染用户原始消息
+    - [OCR] 新增内置的微信 OCR 桥接，并支持本地 Windows 环境自动检测
+
+    💄 改进
+    - [聊天] 附件提取长度限制现已可配置，支持自定义单文件与总长度上限
+    - [聊天] 新增“无限制”模式，适合超长日志、文本文件等提取内容
+    - [Fork] 首次引导和默认模型改为优先使用 DeepSeek，不再默认走原内建服务流
     <!--LANG:END-->

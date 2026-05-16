@@ -3549,6 +3549,19 @@ const migrateConfig = {
       logger.error('migrate 209 error', error as Error)
       return state
     }
+  },
+  '210': (state: RootState) => {
+    try {
+      state.settings.attachmentExtractionLimitMode ||= 'default'
+      state.settings.attachmentExtractionMaxFileChars ||= 20_000
+      state.settings.attachmentExtractionMaxTotalChars ||= 60_000
+
+      logger.info('migrate 210 success')
+      return state
+    } catch (error) {
+      logger.error('migrate 210 error', error as Error)
+      return state
+    }
   }
 }
 

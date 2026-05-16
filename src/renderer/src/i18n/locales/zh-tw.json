@@ -5030,11 +5030,17 @@
         "label": "網格詳細資訊觸發"
       },
       "input": {
+        "attachment_extraction_limit_mode": {
+          "tip": "控制圖片 OCR、視覺擷取、日誌與文件擷取結果注入模型時的最大字元數。可使用預設值、自訂上限，或關閉長度限制。",
+          "title": "附件擷取長度限制"
+        },
+        "attachment_extraction_max_file_chars": "單個附件最大字元數",
+        "attachment_extraction_max_total_chars": "全部附件最大字元數",
         "confirm_delete_message": "刪除訊息前確認",
         "confirm_regenerate_message": "重新產生訊息前確認",
         "enable_quick_triggers": "啟用 / 和 @ 觸發快捷選單",
         "image_process": {
-          "title": "[to be translated]:Image processing"
+          "title": "圖片處理"
         },
         "paste_long_text_as_file": "將長文字貼上為檔案",
         "paste_long_text_threshold": "長文字長度",
