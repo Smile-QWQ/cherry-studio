@@ -191,6 +191,12 @@ export const SYSTEM_MODELS: Record<SystemProviderId | 'defaultModel', Model[]> =
       group: 'OpenAI'
     },
     {
+      id: 'gpt-image-2',
+      provider: 'aihubmix',
+      name: 'gpt-image-2',
+      group: 'OpenAI'
+    },
+    {
       id: 'DeepSeek-V3',
       provider: 'aihubmix',
       name: 'DeepSeek-V3',
@@ -393,6 +399,12 @@ export const SYSTEM_MODELS: Record<SystemProviderId | 'defaultModel', Model[]> =
     }
   ],
   anthropic: [
+    {
+      id: 'claude-opus-4-7',
+      provider: 'anthropic',
+      name: 'Claude Opus 4.7',
+      group: 'Claude 4.7'
+    },
     {
       id: 'claude-opus-4-6',
       provider: 'anthropic',
